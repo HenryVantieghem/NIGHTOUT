@@ -25,7 +25,7 @@ final class LiveUpdateService: @unchecked Sendable {
     @discardableResult
     func postUpdate(
         nightId: UUID,
-        type: LiveUpdateType,
+        type: ServiceUpdateType,
         content: String? = nil,
         mediaUrl: String? = nil,
         latitude: Double? = nil,
@@ -124,7 +124,7 @@ final class LiveUpdateService: @unchecked Sendable {
     ///   - nightId: Night ID
     ///   - type: Update type to filter by
     /// - Returns: Array of updates of specified type
-    func getUpdates(nightId: UUID, type: LiveUpdateType) async throws -> [LiveUpdateRecord] {
+    func getUpdates(nightId: UUID, type: ServiceUpdateType) async throws -> [LiveUpdateRecord] {
         guard let client else { throw ServiceError.notConfigured }
 
         let updates: [LiveUpdateRecord] = try await client
@@ -174,10 +174,10 @@ final class LiveUpdateService: @unchecked Sendable {
     /// Get update counts by type for a night
     /// - Parameter nightId: Night ID
     /// - Returns: Dictionary of update type to count
-    func getUpdateCounts(nightId: UUID) async throws -> [LiveUpdateType: Int] {
+    func getUpdateCounts(nightId: UUID) async throws -> [ServiceUpdateType: Int] {
         let updates = try await getUpdates(nightId: nightId)
 
-        var counts: [LiveUpdateType: Int] = [:]
+        var counts: [ServiceUpdateType: Int] = [:]
         for update in updates {
             counts[update.type, default: 0] += 1
         }
@@ -188,7 +188,7 @@ final class LiveUpdateService: @unchecked Sendable {
 
 // MARK: - Types
 
-enum LiveUpdateType: String, CaseIterable, Sendable {
+enum ServiceUpdateType: String, CaseIterable, Sendable, Hashable {
     case status = "status"
     case photo = "photo"
     case video = "video"
@@ -267,8 +267,8 @@ struct LiveUpdateRecord: Codable, Identifiable, Sendable {
         case createdAt = "created_at"
     }
 
-    var type: LiveUpdateType {
-        LiveUpdateType(rawValue: updateType) ?? .status
+    var type: ServiceUpdateType {
+        ServiceUpdateType(rawValue: updateType) ?? .status
     }
 
     /// Relative time string (e.g., "5m ago")

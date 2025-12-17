@@ -422,7 +422,7 @@ struct AnimatedCounter: View {
         Text("\(value)")
             .font(font)
             .foregroundStyle(color)
-            .contentTransition(.numericText(value: value))
+            .contentTransition(.numericText(value: Double(value)))
             .animation(NightOutAnimation.smoothSpring, value: value)
     }
 }

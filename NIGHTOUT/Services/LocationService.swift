@@ -158,10 +158,10 @@ final class LocationService: @unchecked Sendable {
     /// Get location points for a night (for route display)
     /// - Parameter nightId: Night ID
     /// - Returns: Array of location points ordered by timestamp
-    func getLocationPoints(nightId: UUID) async throws -> [LocationPoint] {
+    func getLocationPoints(nightId: UUID) async throws -> [SupabaseLocationPoint] {
         guard let client else { throw ServiceError.notConfigured }
 
-        let points: [LocationPoint] = try await client
+        let points: [SupabaseLocationPoint] = try await client
             .from("location_points")
             .select()
             .eq("night_id", value: nightId)
@@ -339,7 +339,7 @@ private struct LocationPointInsert: Encodable, Sendable {
     }
 }
 
-struct LocationPoint: Codable, Identifiable, Sendable {
+struct SupabaseLocationPoint: Codable, Identifiable, Sendable {
     let id: UUID
     let nightId: UUID
     let latitude: Double

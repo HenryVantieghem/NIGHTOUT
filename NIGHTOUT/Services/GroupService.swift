@@ -20,7 +20,7 @@ final class GroupService: @unchecked Sendable {
     ///   - iconEmoji: Optional emoji icon
     /// - Returns: Created group
     @discardableResult
-    func createGroup(name: String, description: String? = nil, iconEmoji: String? = nil) async throws -> Group {
+    func createGroup(name: String, description: String? = nil, iconEmoji: String? = nil) async throws -> SupabaseGroup {
         guard let client else { throw ServiceError.notConfigured }
         guard let userId = SessionManager.shared.currentUser?.id else {
             throw ServiceError.unauthorized
@@ -33,7 +33,7 @@ final class GroupService: @unchecked Sendable {
             createdBy: userId
         )
 
-        let response: [Group] = try await client
+        let response: [SupabaseGroup] = try await client
             .from("groups")
             .insert(group)
             .select()
@@ -52,7 +52,7 @@ final class GroupService: @unchecked Sendable {
 
     /// Get all groups for current user
     /// - Returns: Array of groups the user is a member of
-    func getMyGroups() async throws -> [Group] {
+    func getMyGroups() async throws -> [SupabaseGroup] {
         guard let client else { throw ServiceError.notConfigured }
         guard let userId = SessionManager.shared.currentUser?.id else {
             throw ServiceError.unauthorized
@@ -71,7 +71,7 @@ final class GroupService: @unchecked Sendable {
         guard !groupIds.isEmpty else { return [] }
 
         // Get groups
-        let groups: [Group] = try await client
+        let groups: [SupabaseGroup] = try await client
             .from("groups")
             .select()
             .in("id", values: groupIds)
@@ -85,10 +85,10 @@ final class GroupService: @unchecked Sendable {
     /// Get a specific group
     /// - Parameter id: Group ID
     /// - Returns: Group or nil if not found
-    func getGroup(id: UUID) async throws -> Group? {
+    func getGroup(id: UUID) async throws -> SupabaseGroup? {
         guard let client else { throw ServiceError.notConfigured }
 
-        let groups: [Group] = try await client
+        let groups: [SupabaseGroup] = try await client
             .from("groups")
             .select()
             .eq("id", value: id)
@@ -107,17 +107,17 @@ final class GroupService: @unchecked Sendable {
     ///   - iconEmoji: New icon emoji
     func updateGroup(groupId: UUID, name: String? = nil, description: String? = nil, iconEmoji: String? = nil) async throws {
         guard let client else { throw ServiceError.notConfigured }
+        guard name != nil || description != nil || iconEmoji != nil else { return }
 
-        var updates: [String: Any] = [:]
-        if let name { updates["name"] = name }
-        if let description { updates["description"] = description }
-        if let iconEmoji { updates["icon_emoji"] = iconEmoji }
-
-        guard !updates.isEmpty else { return }
+        let update = GroupUpdate(
+            name: name,
+            description: description,
+            iconEmoji: iconEmoji
+        )
 
         try await client
             .from("groups")
-            .update(updates)
+            .update(update)
             .eq("id", value: groupId)
             .execute()
     }
@@ -296,7 +296,7 @@ final class GroupService: @unchecked Sendable {
 
     /// Get pending invitations for current user
     /// - Returns: Array of groups with pending invitations
-    func getPendingInvitations() async throws -> [Group] {
+    func getPendingInvitations() async throws -> [SupabaseGroup] {
         guard let client else { throw ServiceError.notConfigured }
         guard let userId = SessionManager.shared.currentUser?.id else {
             throw ServiceError.unauthorized
@@ -316,7 +316,7 @@ final class GroupService: @unchecked Sendable {
         guard !groupIds.isEmpty else { return [] }
 
         // Get groups
-        let groups: [Group] = try await client
+        let groups: [SupabaseGroup] = try await client
             .from("groups")
             .select()
             .in("id", values: groupIds)
@@ -387,7 +387,19 @@ private struct GroupInsert: Encodable, Sendable {
     }
 }
 
-struct Group: Codable, Identifiable, Sendable {
+private struct GroupUpdate: Encodable, Sendable {
+    let name: String?
+    let description: String?
+    let iconEmoji: String?
+
+    enum CodingKeys: String, CodingKey {
+        case name
+        case description
+        case iconEmoji = "icon_emoji"
+    }
+}
+
+struct SupabaseGroup: Codable, Identifiable, Sendable {
     let id: UUID
     let name: String
     let description: String?

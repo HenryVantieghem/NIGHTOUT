@@ -40,10 +40,10 @@ final class MoodService: @unchecked Sendable {
     /// Get all mood entries for a night
     /// - Parameter nightId: Night ID
     /// - Returns: Array of mood entries ordered by timestamp
-    func getMoods(nightId: UUID) async throws -> [MoodEntry] {
+    func getMoods(nightId: UUID) async throws -> [SupabaseMoodEntry] {
         guard let client else { throw ServiceError.notConfigured }
 
-        let entries: [MoodEntry] = try await client
+        let entries: [SupabaseMoodEntry] = try await client
             .from("mood_entries")
             .select()
             .eq("night_id", value: nightId)
@@ -109,7 +109,7 @@ final class MoodService: @unchecked Sendable {
             throw ServiceError.unauthorized
         }
 
-        let entries: [MoodEntry] = try await client
+        let entries: [SupabaseMoodEntry] = try await client
             .from("mood_entries")
             .select()
             .eq("user_id", value: userId)
@@ -159,7 +159,7 @@ private struct MoodEntryInsert: Encodable, Sendable {
     }
 }
 
-struct MoodEntry: Codable, Identifiable, Sendable {
+struct SupabaseMoodEntry: Codable, Identifiable, Sendable {
     let id: UUID
     let nightId: UUID
     let userId: UUID
@@ -202,9 +202,9 @@ struct MoodEntry: Codable, Identifiable, Sendable {
 }
 
 struct MoodTrend: Sendable {
-    let first: MoodEntry
-    let peak: MoodEntry?
-    let last: MoodEntry
+    let first: SupabaseMoodEntry
+    let peak: SupabaseMoodEntry?
+    let last: SupabaseMoodEntry
     let average: Int
     let count: Int
 

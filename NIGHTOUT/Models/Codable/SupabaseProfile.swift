@@ -20,6 +20,9 @@ struct SupabaseProfile: Codable, Identifiable, Sendable {
     var currentStreak: Int
     var longestStreak: Int
 
+    // Social
+    var friendCount: Int?
+
     // Settings
     var emailNotifications: Bool
 

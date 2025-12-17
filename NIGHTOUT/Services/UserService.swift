@@ -169,6 +169,27 @@ final class UserService: @unchecked Sendable {
 
         return response.isEmpty
     }
+
+    // MARK: - Account Management
+
+    /// Delete current user's account
+    /// Note: This deletes the profile but Supabase auth user deletion requires admin API
+    func deleteAccount() async throws {
+        guard let client else { throw ServiceError.notConfigured }
+        guard let userId = SessionManager.shared.currentUser?.id else {
+            throw ServiceError.unauthorized
+        }
+
+        // Delete user's profile (cascades should handle related data via RLS)
+        try await client
+            .from("profiles")
+            .delete()
+            .eq("id", value: userId)
+            .execute()
+
+        // Sign out the user
+        try await AuthService.shared.signOut()
+    }
 }
 
 // MARK: - AnyEncodable Helper

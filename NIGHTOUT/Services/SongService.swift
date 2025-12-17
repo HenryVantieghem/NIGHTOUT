@@ -32,7 +32,7 @@ final class SongService: @unchecked Sendable {
         artworkUrl: String? = nil,
         appleMusicId: String? = nil,
         spotifyId: String? = nil
-    ) async throws -> Song {
+    ) async throws -> SupabaseSong {
         guard let client else { throw ServiceError.notConfigured }
         guard let userId = SessionManager.shared.currentUser?.id else {
             throw ServiceError.unauthorized
@@ -49,7 +49,7 @@ final class SongService: @unchecked Sendable {
             spotifyId: spotifyId
         )
 
-        let response: [Song] = try await client
+        let response: [SupabaseSong] = try await client
             .from("songs")
             .insert(song)
             .select()
@@ -66,10 +66,10 @@ final class SongService: @unchecked Sendable {
     /// Get all songs for a night
     /// - Parameter nightId: Night ID
     /// - Returns: Array of songs ordered by when they were played
-    func getSongs(nightId: UUID) async throws -> [Song] {
+    func getSongs(nightId: UUID) async throws -> [SupabaseSong] {
         guard let client else { throw ServiceError.notConfigured }
 
-        let songs: [Song] = try await client
+        let songs: [SupabaseSong] = try await client
             .from("songs")
             .select()
             .eq("night_id", value: nightId)
@@ -83,11 +83,11 @@ final class SongService: @unchecked Sendable {
     /// Get unique songs (no duplicates by title + artist)
     /// - Parameter nightId: Night ID
     /// - Returns: Array of unique songs
-    func getUniqueSongs(nightId: UUID) async throws -> [Song] {
+    func getUniqueSongs(nightId: UUID) async throws -> [SupabaseSong] {
         let allSongs = try await getSongs(nightId: nightId)
 
         var seen: Set<String> = []
-        var unique: [Song] = []
+        var unique: [SupabaseSong] = []
 
         for song in allSongs {
             let key = "\(song.title.lowercased())|\(song.artist.lowercased())"
@@ -105,10 +105,10 @@ final class SongService: @unchecked Sendable {
     ///   - nightId: Night ID
     ///   - limit: Maximum number of songs
     /// - Returns: Array of recent songs (newest first)
-    func getRecentSongs(nightId: UUID, limit: Int = 5) async throws -> [Song] {
+    func getRecentSongs(nightId: UUID, limit: Int = 5) async throws -> [SupabaseSong] {
         guard let client else { throw ServiceError.notConfigured }
 
-        let songs: [Song] = try await client
+        let songs: [SupabaseSong] = try await client
             .from("songs")
             .select()
             .eq("night_id", value: nightId)
@@ -140,7 +140,7 @@ final class SongService: @unchecked Sendable {
             throw ServiceError.unauthorized
         }
 
-        let songs: [Song] = try await client
+        let songs: [SupabaseSong] = try await client
             .from("songs")
             .select()
             .eq("user_id", value: userId)
@@ -170,7 +170,7 @@ final class SongService: @unchecked Sendable {
         }
 
         // Calculate song play counts
-        var songCounts: [String: (song: Song, count: Int)] = [:]
+        var songCounts: [String: (song: SupabaseSong, count: Int)] = [:]
         for song in songs {
             let key = "\(song.title.lowercased())|\(song.artist.lowercased())"
             if var existing = songCounts[key] {
@@ -238,7 +238,7 @@ private struct SongInsert: Encodable, Sendable {
     }
 }
 
-struct Song: Codable, Identifiable, Sendable {
+struct SupabaseSong: Codable, Identifiable, Sendable {
     let id: UUID
     let nightId: UUID
     let userId: UUID
@@ -285,7 +285,7 @@ struct MusicStats: Sendable {
     let totalSongs: Int
     let uniqueSongs: Int
     let topArtist: String?
-    let topSong: Song?
+    let topSong: SupabaseSong?
     let artistCounts: [String: Int]
 
     /// Top 5 artists by play count

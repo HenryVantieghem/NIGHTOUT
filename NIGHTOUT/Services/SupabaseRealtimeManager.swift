@@ -14,7 +14,7 @@ final class SupabaseRealtimeManager: @unchecked Sendable {
     private(set) var friendLocations: [FriendLocation] = []
 
     /// Live updates for active night timeline
-    private(set) var liveUpdates: [LiveUpdate] = []
+    private(set) var liveUpdates: [RealtimeLiveUpdate] = []
 
     /// Current subscriptions
     private var friendLocationChannel: RealtimeChannelV2?
@@ -183,7 +183,7 @@ final class SupabaseRealtimeManager: @unchecked Sendable {
 
     private func handleLiveUpdateInsert(_ action: InsertAction) async {
         do {
-            let update = try action.decodeRecord(as: LiveUpdate.self, decoder: JSONDecoder.supabaseDecoder)
+            let update = try action.decodeRecord(as: RealtimeLiveUpdate.self, decoder: JSONDecoder.supabaseDecoder)
             await MainActor.run {
                 self.liveUpdates.insert(update, at: 0)
             }
@@ -385,7 +385,7 @@ final class SupabaseRealtimeManager: @unchecked Sendable {
 // MARK: - Supporting Types
 
 /// Friend location for live map
-struct FriendLocation: Codable, Identifiable, Sendable {
+struct FriendLocation: Codable, Identifiable, Sendable, Equatable {
     let id: UUID
     let userId: UUID
     let nightId: UUID?
@@ -407,8 +407,8 @@ struct FriendLocation: Codable, Identifiable, Sendable {
     }
 }
 
-/// Live update for activity timeline
-struct LiveUpdate: Codable, Identifiable, Sendable {
+/// Live update for activity timeline (real-time)
+struct RealtimeLiveUpdate: Codable, Identifiable, Sendable {
     let id: UUID
     let nightId: UUID
     let updateType: String

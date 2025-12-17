@@ -31,7 +31,7 @@ final class VenueService: @unchecked Sendable {
         longitude: Double,
         address: String? = nil,
         category: String? = nil
-    ) async throws -> Venue {
+    ) async throws -> SupabaseVenue {
         guard let client else { throw ServiceError.notConfigured }
         guard let userId = SessionManager.shared.currentUser?.id else {
             throw ServiceError.unauthorized
@@ -47,7 +47,7 @@ final class VenueService: @unchecked Sendable {
             category: category
         )
 
-        let response: [Venue] = try await client
+        let response: [SupabaseVenue] = try await client
             .from("venues")
             .insert(venue)
             .select()
@@ -76,10 +76,10 @@ final class VenueService: @unchecked Sendable {
     /// Get all venues for a night
     /// - Parameter nightId: Night ID
     /// - Returns: Array of venues ordered by arrival time
-    func getVenues(nightId: UUID) async throws -> [Venue] {
+    func getVenues(nightId: UUID) async throws -> [SupabaseVenue] {
         guard let client else { throw ServiceError.notConfigured }
 
-        let venues: [Venue] = try await client
+        let venues: [SupabaseVenue] = try await client
             .from("venues")
             .select()
             .eq("night_id", value: nightId)
@@ -93,10 +93,10 @@ final class VenueService: @unchecked Sendable {
     /// Get current venue (where left_at is null)
     /// - Parameter nightId: Night ID
     /// - Returns: Current venue or nil
-    func getCurrentVenue(nightId: UUID) async throws -> Venue? {
+    func getCurrentVenue(nightId: UUID) async throws -> SupabaseVenue? {
         guard let client else { throw ServiceError.notConfigured }
 
-        let venues: [Venue] = try await client
+        let venues: [SupabaseVenue] = try await client
             .from("venues")
             .select()
             .eq("night_id", value: nightId)
@@ -117,17 +117,17 @@ final class VenueService: @unchecked Sendable {
     ///   - notes: Optional notes
     func updateVenue(venueId: UUID, name: String? = nil, rating: Int? = nil, notes: String? = nil) async throws {
         guard let client else { throw ServiceError.notConfigured }
+        guard name != nil || rating != nil || notes != nil else { return }
 
-        var updates: [String: Any] = [:]
-        if let name { updates["name"] = name }
-        if let rating { updates["rating"] = max(1, min(5, rating)) }
-        if let notes { updates["notes"] = notes }
-
-        guard !updates.isEmpty else { return }
+        let update = VenueUpdate(
+            name: name,
+            rating: rating.map { max(1, min(5, $0)) },
+            notes: notes
+        )
 
         try await client
             .from("venues")
-            .update(updates)
+            .update(update)
             .eq("id", value: venueId)
             .execute()
     }
@@ -152,7 +152,7 @@ final class VenueService: @unchecked Sendable {
             throw ServiceError.unauthorized
         }
 
-        let venues: [Venue] = try await client
+        let venues: [SupabaseVenue] = try await client
             .from("venues")
             .select()
             .eq("user_id", value: userId)
@@ -230,7 +230,13 @@ private struct VenueInsert: Encodable, Sendable {
     }
 }
 
-struct Venue: Codable, Identifiable, Sendable {
+private struct VenueUpdate: Encodable, Sendable {
+    let name: String?
+    let rating: Int?
+    let notes: String?
+}
+
+struct SupabaseVenue: Codable, Identifiable, Sendable {
     let id: UUID
     let nightId: UUID
     let userId: UUID

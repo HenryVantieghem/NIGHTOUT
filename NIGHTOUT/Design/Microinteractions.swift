@@ -164,9 +164,9 @@ extension View {
     }
 }
 
-// MARK: - Shimmer Effect
+// MARK: - Gold Shimmer Effect
 /// Gold shimmer sweep for achievements
-struct ShimmerModifier: ViewModifier {
+struct GoldShimmerModifier: ViewModifier {
     let duration: Double
     @State private var phase: CGFloat = 0
 
@@ -200,8 +200,8 @@ struct ShimmerModifier: ViewModifier {
 }
 
 extension View {
-    func shimmer(duration: Double = 2.0) -> some View {
-        modifier(ShimmerModifier(duration: duration))
+    func goldShimmer(duration: Double = 2.0) -> some View {
+        modifier(GoldShimmerModifier(duration: duration))
     }
 }
 
@@ -429,44 +429,6 @@ struct TypingIndicatorView: View {
     }
 }
 
-// MARK: - Number Counter Animation
-/// Animated number counter for stats
-@MainActor
-struct AnimatedCounter: View {
-    let value: Int
-    let font: Font
-    let color: Color
-
-    @State private var displayValue: Int = 0
-
-    var body: some View {
-        Text("\(displayValue)")
-            .font(font)
-            .foregroundStyle(color)
-            .contentTransition(.numericText())
-            .onChange(of: value) { _, newValue in
-                animateToValue(newValue)
-            }
-            .onAppear {
-                animateToValue(value)
-            }
-    }
-
-    private func animateToValue(_ target: Int) {
-        let steps = min(abs(target - displayValue), 20)
-        let stepDuration = 0.5 / Double(max(steps, 1))
-
-        for i in 0...steps {
-            let stepValue = displayValue + (target - displayValue) * i / max(steps, 1)
-            DispatchQueue.main.asyncAfter(deadline: .now() + stepDuration * Double(i)) {
-                withAnimation(NightOutAnimation.quick) {
-                    displayValue = stepValue
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Toast Notification
 /// Slide-up toast notification
 @MainActor
@@ -546,7 +508,7 @@ struct ToastView: View {
 
             // Shimmer button
             GlassButton("Achievement Unlocked", icon: "star.fill", style: .prominent, size: .large) {}
-                .shimmer()
+                .goldShimmer()
 
             // Pulse glow
             Circle()

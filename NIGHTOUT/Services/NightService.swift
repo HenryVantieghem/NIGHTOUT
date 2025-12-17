@@ -283,6 +283,47 @@ final class NightService: @unchecked Sendable {
             .eq("id", value: id)
             .execute()
     }
+
+    // MARK: - Stats
+
+    /// Get user stats (total nights, total drinks)
+    func getUserStats() async throws -> UserNightStats {
+        guard let client else { throw ServiceError.notConfigured }
+        guard let userId = SessionManager.shared.currentUser?.id else {
+            throw ServiceError.unauthorized
+        }
+
+        // Get total nights count
+        let nights: [SupabaseNight] = try await client
+            .from("nights")
+            .select()
+            .eq("user_id", value: userId)
+            .execute()
+            .value
+
+        // Get total drinks count
+        let drinks: [DrinkCountRecord] = try await client
+            .from("drinks")
+            .select("id")
+            .eq("user_id", value: userId)
+            .execute()
+            .value
+
+        return UserNightStats(
+            totalNights: nights.count,
+            totalDrinks: drinks.count
+        )
+    }
+}
+
+// MARK: - Stats DTO
+struct UserNightStats: Sendable {
+    let totalNights: Int
+    let totalDrinks: Int
+}
+
+private struct DrinkCountRecord: Decodable {
+    let id: UUID
 }
 
 // MARK: - Friendship DTO for fetching
