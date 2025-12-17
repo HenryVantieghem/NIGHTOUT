@@ -1,0 +1,777 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		822E02E32EE6B4BB00A6624A /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02E22EE6B4BB00A6624A /* Auth */; };
+		822E02E52EE6B4BB00A6624A /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02E42EE6B4BB00A6624A /* Functions */; };
+		822E02E72EE6B4BB00A6624A /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02E62EE6B4BB00A6624A /* PostgREST */; };
+		822E02E92EE6B4BB00A6624A /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02E82EE6B4BB00A6624A /* Realtime */; };
+		822E02EB2EE6B4BB00A6624A /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02EA2EE6B4BB00A6624A /* Storage */; };
+		822E02ED2EE6B4BB00A6624A /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 822E02EC2EE6B4BB00A6624A /* Supabase */; };
+		82CCD8192EE67E8E00D402AF /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8182EE67E8E00D402AF /* Auth */; };
+		82CCD81B2EE67E8E00D402AF /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD81A2EE67E8E00D402AF /* Functions */; };
+		82CCD81D2EE67E8E00D402AF /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD81C2EE67E8E00D402AF /* PostgREST */; };
+		82CCD81F2EE67E8E00D402AF /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD81E2EE67E8E00D402AF /* Realtime */; };
+		82CCD8212EE67E8E00D402AF /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8202EE67E8E00D402AF /* Storage */; };
+		82CCD8232EE67E8E00D402AF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8222EE67E8E00D402AF /* Supabase */; };
+		82CCD82B2EE6886700D402AF /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD82A2EE6886700D402AF /* Auth */; };
+		82CCD82D2EE6886700D402AF /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD82C2EE6886700D402AF /* Functions */; };
+		82CCD82F2EE6886700D402AF /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD82E2EE6886700D402AF /* PostgREST */; };
+		82CCD8312EE6886700D402AF /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8302EE6886700D402AF /* Realtime */; };
+		82CCD8332EE6886700D402AF /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8322EE6886700D402AF /* Storage */; };
+		82CCD8352EE6886700D402AF /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 82CCD8342EE6886700D402AF /* Supabase */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		82CCD4BD2EE6432200D402AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 82CCD4A72EE6432000D402AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 82CCD4AE2EE6432000D402AF;
+			remoteInfo = NIGHTOUT;
+		};
+		82CCD4C72EE6432200D402AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 82CCD4A72EE6432000D402AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 82CCD4AE2EE6432000D402AF;
+			remoteInfo = NIGHTOUT;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		82CCD4AF2EE6432000D402AF /* NIGHTOUT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NIGHTOUT.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		82CCD4BC2EE6432200D402AF /* NIGHTOUTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NIGHTOUTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		82CCD4C62EE6432200D402AF /* NIGHTOUTUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NIGHTOUTUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		82CCD4B12EE6432000D402AF /* NIGHTOUT */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NIGHTOUT;
+			sourceTree = "<group>";
+		};
+		82CCD4BF2EE6432200D402AF /* NIGHTOUTTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NIGHTOUTTests;
+			sourceTree = "<group>";
+		};
+		82CCD4C92EE6432200D402AF /* NIGHTOUTUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NIGHTOUTUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		82CCD4AC2EE6432000D402AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				82CCD81D2EE67E8E00D402AF /* PostgREST in Frameworks */,
+				82CCD81B2EE67E8E00D402AF /* Functions in Frameworks */,
+				82CCD8232EE67E8E00D402AF /* Supabase in Frameworks */,
+				82CCD8192EE67E8E00D402AF /* Auth in Frameworks */,
+				82CCD8212EE67E8E00D402AF /* Storage in Frameworks */,
+				82CCD81F2EE67E8E00D402AF /* Realtime in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4B92EE6432200D402AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				82CCD82F2EE6886700D402AF /* PostgREST in Frameworks */,
+				82CCD82D2EE6886700D402AF /* Functions in Frameworks */,
+				82CCD8352EE6886700D402AF /* Supabase in Frameworks */,
+				82CCD82B2EE6886700D402AF /* Auth in Frameworks */,
+				82CCD8332EE6886700D402AF /* Storage in Frameworks */,
+				82CCD8312EE6886700D402AF /* Realtime in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4C32EE6432200D402AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				822E02E72EE6B4BB00A6624A /* PostgREST in Frameworks */,
+				822E02E52EE6B4BB00A6624A /* Functions in Frameworks */,
+				822E02ED2EE6B4BB00A6624A /* Supabase in Frameworks */,
+				822E02E32EE6B4BB00A6624A /* Auth in Frameworks */,
+				822E02EB2EE6B4BB00A6624A /* Storage in Frameworks */,
+				822E02E92EE6B4BB00A6624A /* Realtime in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		82CCD4A62EE6432000D402AF = {
+			isa = PBXGroup;
+			children = (
+				82CCD4B12EE6432000D402AF /* NIGHTOUT */,
+				82CCD4BF2EE6432200D402AF /* NIGHTOUTTests */,
+				82CCD4C92EE6432200D402AF /* NIGHTOUTUITests */,
+				82CCD8162EE67E7100D402AF /* Frameworks */,
+				82CCD4B02EE6432000D402AF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		82CCD4B02EE6432000D402AF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				82CCD4AF2EE6432000D402AF /* NIGHTOUT.app */,
+				82CCD4BC2EE6432200D402AF /* NIGHTOUTTests.xctest */,
+				82CCD4C62EE6432200D402AF /* NIGHTOUTUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		82CCD8162EE67E7100D402AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		82CCD4AE2EE6432000D402AF /* NIGHTOUT */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82CCD4D02EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUT" */;
+			buildPhases = (
+				82CCD4AB2EE6432000D402AF /* Sources */,
+				82CCD4AC2EE6432000D402AF /* Frameworks */,
+				82CCD4AD2EE6432000D402AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				82CCD4B12EE6432000D402AF /* NIGHTOUT */,
+			);
+			name = NIGHTOUT;
+			packageProductDependencies = (
+				82CCD8182EE67E8E00D402AF /* Auth */,
+				82CCD81A2EE67E8E00D402AF /* Functions */,
+				82CCD81C2EE67E8E00D402AF /* PostgREST */,
+				82CCD81E2EE67E8E00D402AF /* Realtime */,
+				82CCD8202EE67E8E00D402AF /* Storage */,
+				82CCD8222EE67E8E00D402AF /* Supabase */,
+			);
+			productName = NIGHTOUT;
+			productReference = 82CCD4AF2EE6432000D402AF /* NIGHTOUT.app */;
+			productType = "com.apple.product-type.application";
+		};
+		82CCD4BB2EE6432200D402AF /* NIGHTOUTTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82CCD4D32EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUTTests" */;
+			buildPhases = (
+				82CCD4B82EE6432200D402AF /* Sources */,
+				82CCD4B92EE6432200D402AF /* Frameworks */,
+				82CCD4BA2EE6432200D402AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82CCD4BE2EE6432200D402AF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				82CCD4BF2EE6432200D402AF /* NIGHTOUTTests */,
+			);
+			name = NIGHTOUTTests;
+			packageProductDependencies = (
+				82CCD82A2EE6886700D402AF /* Auth */,
+				82CCD82C2EE6886700D402AF /* Functions */,
+				82CCD82E2EE6886700D402AF /* PostgREST */,
+				82CCD8302EE6886700D402AF /* Realtime */,
+				82CCD8322EE6886700D402AF /* Storage */,
+				82CCD8342EE6886700D402AF /* Supabase */,
+			);
+			productName = NIGHTOUTTests;
+			productReference = 82CCD4BC2EE6432200D402AF /* NIGHTOUTTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		82CCD4C52EE6432200D402AF /* NIGHTOUTUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 82CCD4D62EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUTUITests" */;
+			buildPhases = (
+				82CCD4C22EE6432200D402AF /* Sources */,
+				82CCD4C32EE6432200D402AF /* Frameworks */,
+				82CCD4C42EE6432200D402AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				82CCD4C82EE6432200D402AF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				82CCD4C92EE6432200D402AF /* NIGHTOUTUITests */,
+			);
+			name = NIGHTOUTUITests;
+			packageProductDependencies = (
+				822E02E22EE6B4BB00A6624A /* Auth */,
+				822E02E42EE6B4BB00A6624A /* Functions */,
+				822E02E62EE6B4BB00A6624A /* PostgREST */,
+				822E02E82EE6B4BB00A6624A /* Realtime */,
+				822E02EA2EE6B4BB00A6624A /* Storage */,
+				822E02EC2EE6B4BB00A6624A /* Supabase */,
+			);
+			productName = NIGHTOUTUITests;
+			productReference = 82CCD4C62EE6432200D402AF /* NIGHTOUTUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		82CCD4A72EE6432000D402AF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2610;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					82CCD4AE2EE6432000D402AF = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
+					82CCD4BB2EE6432200D402AF = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 82CCD4AE2EE6432000D402AF;
+					};
+					82CCD4C52EE6432200D402AF = {
+						CreatedOnToolsVersion = 26.1.1;
+						TestTargetID = 82CCD4AE2EE6432000D402AF;
+					};
+				};
+			};
+			buildConfigurationList = 82CCD4AA2EE6432000D402AF /* Build configuration list for PBXProject "NIGHTOUT" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 82CCD4A62EE6432000D402AF;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 82CCD4B02EE6432000D402AF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				82CCD4AE2EE6432000D402AF /* NIGHTOUT */,
+				82CCD4BB2EE6432200D402AF /* NIGHTOUTTests */,
+				82CCD4C52EE6432200D402AF /* NIGHTOUTUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		82CCD4AD2EE6432000D402AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4BA2EE6432200D402AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4C42EE6432200D402AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		82CCD4AB2EE6432000D402AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4B82EE6432200D402AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		82CCD4C22EE6432200D402AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		82CCD4BE2EE6432200D402AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 82CCD4AE2EE6432000D402AF /* NIGHTOUT */;
+			targetProxy = 82CCD4BD2EE6432200D402AF /* PBXContainerItemProxy */;
+		};
+		82CCD4C82EE6432200D402AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 82CCD4AE2EE6432000D402AF /* NIGHTOUT */;
+			targetProxy = 82CCD4C72EE6432200D402AF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		82CCD4CE2EE6432200D402AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		82CCD4CF2EE6432200D402AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		82CCD4D12EE6432200D402AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "THE NIGHTOUT APP";
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLSchemes =     (\n        \"app.TheHangout.NIGHTOUT\"\n    );\n}";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "NIGHTOUT needs access to Apple Music to search and add songs to your night out.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "NIGHTOUT needs access to your camera to capture photos and videos during your night out.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "NIGHTOUT needs your location to track your night out route and tag venues you visit.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "NIGHTOUT needs your location to track your night out route and tag venues you visit.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NIGHTOUT needs access to your microphone to record video with audio during your night out.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "NIGHTOUT needs permission to save photos and videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "NIGHTOUT needs access to your photo library to save and share your night out memories.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUT;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		82CCD4D22EE6432200D402AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "THE NIGHTOUT APP";
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLSchemes =     (\n        \"app.TheHangout.NIGHTOUT\"\n    );\n}";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "NIGHTOUT needs access to Apple Music to search and add songs to your night out.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "NIGHTOUT needs access to your camera to capture photos and videos during your night out.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "NIGHTOUT needs your location to track your night out route and tag venues you visit.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "NIGHTOUT needs your location to track your night out route and tag venues you visit.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "NIGHTOUT needs access to your microphone to record video with audio during your night out.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "NIGHTOUT needs permission to save photos and videos to your photo library.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "NIGHTOUT needs access to your photo library to save and share your night out memories.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUT;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		82CCD4D42EE6432200D402AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUTTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NIGHTOUT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NIGHTOUT";
+			};
+			name = Debug;
+		};
+		82CCD4D52EE6432200D402AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUTTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NIGHTOUT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NIGHTOUT";
+			};
+			name = Release;
+		};
+		82CCD4D72EE6432200D402AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUTUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NIGHTOUT;
+			};
+			name = Debug;
+		};
+		82CCD4D82EE6432200D402AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 32P9K3C49X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.TheHangout.NIGHTOUTUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = NIGHTOUT;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		82CCD4AA2EE6432000D402AF /* Build configuration list for PBXProject "NIGHTOUT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				82CCD4CE2EE6432200D402AF /* Debug */,
+				82CCD4CF2EE6432200D402AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		82CCD4D02EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				82CCD4D12EE6432200D402AF /* Debug */,
+				82CCD4D22EE6432200D402AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		82CCD4D32EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUTTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				82CCD4D42EE6432200D402AF /* Debug */,
+				82CCD4D52EE6432200D402AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		82CCD4D62EE6432200D402AF /* Build configuration list for PBXNativeTarget "NIGHTOUTUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				82CCD4D72EE6432200D402AF /* Debug */,
+				82CCD4D82EE6432200D402AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase-community/supabase-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		822E02E22EE6B4BB00A6624A /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		822E02E42EE6B4BB00A6624A /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		822E02E62EE6B4BB00A6624A /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		822E02E82EE6B4BB00A6624A /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		822E02EA2EE6B4BB00A6624A /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		822E02EC2EE6B4BB00A6624A /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		82CCD8182EE67E8E00D402AF /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		82CCD81A2EE67E8E00D402AF /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		82CCD81C2EE67E8E00D402AF /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		82CCD81E2EE67E8E00D402AF /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		82CCD8202EE67E8E00D402AF /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		82CCD8222EE67E8E00D402AF /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		82CCD82A2EE6886700D402AF /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		82CCD82C2EE6886700D402AF /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		82CCD82E2EE6886700D402AF /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		82CCD8302EE6886700D402AF /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		82CCD8322EE6886700D402AF /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+		82CCD8342EE6886700D402AF /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 82CCD8172EE67E8E00D402AF /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 82CCD4A72EE6432000D402AF /* Project object */;
+}

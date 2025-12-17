@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Files were modified. Remember to commit changes when a logical unit of work is complete. Say 'commit' to create a commit."
+          }
+        ]
+      }
+    ]
+  }
+}
