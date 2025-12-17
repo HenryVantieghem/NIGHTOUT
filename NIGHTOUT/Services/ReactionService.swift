@@ -83,6 +83,24 @@ final class ReactionService: @unchecked Sendable {
 
     // MARK: - Reactions
 
+    /// Send a reaction/ping to a friend (for live map)
+    func sendReaction(toUserId: UUID, emoji: String, type: String = "map_ping") async throws {
+        guard let client else { throw ServiceError.notConfigured }
+        guard let senderId = SessionManager.shared.currentUser?.id else {
+            throw ServiceError.unauthorized
+        }
+
+        try await client
+            .from("reactions")
+            .insert([
+                "sender_id": senderId.uuidString,
+                "recipient_id": toUserId.uuidString,
+                "emoji": emoji,
+                "reaction_type": type
+            ])
+            .execute()
+    }
+
     /// Add reaction to a night
     func addReaction(nightId: UUID, emoji: String) async throws {
         guard let client else { throw ServiceError.notConfigured }

@@ -1,20 +1,40 @@
 import SwiftUI
 
-/// Sheet to log a drink
+/// Sheet to log a drink with skeuomorphic emoji selection
 @MainActor
 struct AddDrinkView: View {
     @Environment(\.dismiss) private var dismiss
     let nightId: UUID
+    let onDrinkAdded: () -> Void
 
     @State private var selectedType: DrinkType = .beer
     @State private var customName = ""
     @State private var customEmoji = ""
     @State private var isAdding = false
+    @State private var showSuccess = false
+
+    init(nightId: UUID, onDrinkAdded: @escaping () -> Void = {}) {
+        self.nightId = nightId
+        self.onDrinkAdded = onDrinkAdded
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: NightOutSpacing.xxl) {
+                    // Selected drink preview
+                    VStack(spacing: NightOutSpacing.sm) {
+                        Text(selectedType.emoji)
+                            .font(.system(size: 80))
+                            .scaleEffect(showSuccess ? 1.3 : 1.0)
+
+                        Text(selectedType.displayName)
+                            .font(NightOutTypography.title2)
+                            .foregroundStyle(NightOutColors.chrome)
+                    }
+                    .padding(.top, NightOutSpacing.lg)
+                    .animation(NightOutAnimation.bouncy, value: selectedType)
+
                     // Drink type grid
                     LazyVGrid(columns: [
                         GridItem(.flexible()),
@@ -55,6 +75,7 @@ struct AddDrinkView: View {
                             }
                         }
                         .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                     }
 
                     Spacer(minLength: NightOutSpacing.xxl)
@@ -62,7 +83,7 @@ struct AddDrinkView: View {
                     // Add button
                     GlassButton(
                         "Add Drink",
-                        icon: "plus",
+                        icon: "plus.circle.fill",
                         style: .primary,
                         size: .large,
                         isLoading: isAdding
@@ -77,8 +98,6 @@ struct AddDrinkView: View {
             .nightOutBackground()
             .navigationTitle("Add Drink")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(NightOutColors.background, for: .navigationBar)
-            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") {
@@ -87,16 +106,38 @@ struct AddDrinkView: View {
                     .foregroundStyle(NightOutColors.silver)
                 }
             }
+            .animation(NightOutAnimation.smooth, value: selectedType)
         }
     }
 
     private func addDrink() async {
         isAdding = true
-        defer { isAdding = false }
 
-        // TODO: Save drink to Supabase
-        NightOutHaptics.success()
-        dismiss()
+        do {
+            _ = try await DrinkService.shared.addDrink(
+                nightId: nightId,
+                type: selectedType,
+                customName: selectedType == .custom ? customName : nil,
+                customEmoji: selectedType == .custom ? customEmoji : nil
+            )
+
+            // Success animation
+            withAnimation(NightOutAnimation.bouncy) {
+                showSuccess = true
+            }
+
+            NightOutHaptics.success()
+
+            // Brief delay to show success
+            try? await Task.sleep(nanoseconds: 300_000_000)
+
+            onDrinkAdded()
+            dismiss()
+        } catch {
+            print("Error adding drink: \(error)")
+            NightOutHaptics.error()
+            isAdding = false
+        }
     }
 }
 
@@ -110,24 +151,33 @@ struct DrinkTypeButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: NightOutSpacing.sm) {
-                Text(type.emoji)
-                    .font(.system(size: 40))
+                // Emoji with color background
+                ZStack {
+                    Circle()
+                        .fill(type.color.opacity(isSelected ? 0.3 : 0.1))
+                        .frame(width: 56, height: 56)
+
+                    Text(type.emoji)
+                        .font(.system(size: 32))
+                }
 
                 Text(type.displayName)
                     .font(NightOutTypography.caption)
                     .foregroundStyle(isSelected ? NightOutColors.chrome : NightOutColors.silver)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, NightOutSpacing.lg)
-            .background(isSelected ? NightOutColors.neonPink.opacity(0.2) : NightOutColors.glassBackground)
+            .padding(.vertical, NightOutSpacing.md)
+            .background(isSelected ? type.color.opacity(0.15) : NightOutColors.glassBackground)
             .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.md))
             .overlay(
                 RoundedRectangle(cornerRadius: NightOutRadius.md)
-                    .stroke(isSelected ? NightOutColors.neonPink : NightOutColors.glassBorder, lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? type.color : NightOutColors.glassBorder, lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)
         .contentShape(Rectangle())
+        .scaleEffect(isSelected ? 1.02 : 1.0)
+        .animation(NightOutAnimation.bouncy, value: isSelected)
     }
 }
 

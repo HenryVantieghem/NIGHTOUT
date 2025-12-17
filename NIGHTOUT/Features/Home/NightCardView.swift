@@ -6,6 +6,15 @@ struct NightCardView: View {
     let night: SupabaseNight
     @State private var profile: SupabaseProfile?
     @State private var hasLiked = false
+    @State private var commentCount = 0
+    @State private var drinkCount = 0
+    @State private var photos: [SupabaseMedia] = []
+    @State private var likeCount: Int
+
+    init(night: SupabaseNight) {
+        self.night = night
+        self._likeCount = State(initialValue: night.likeCount)
+    }
 
     var body: some View {
         GlassCard {
@@ -59,10 +68,48 @@ struct NightCardView: View {
                         .lineLimit(3)
                 }
 
+                // Photo preview
+                if !photos.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: NightOutSpacing.sm) {
+                            ForEach(photos.prefix(4)) { photo in
+                                AsyncImage(url: try? MediaService.shared.getPublicURL(path: photo.storagePath)) { image in
+                                    image
+                                        .resizable()
+                                        .scaledToFill()
+                                } placeholder: {
+                                    RoundedRectangle(cornerRadius: NightOutRadius.sm)
+                                        .fill(NightOutColors.surface)
+                                }
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.sm))
+                            }
+
+                            if photos.count > 4 {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: NightOutRadius.sm)
+                                        .fill(NightOutColors.surface)
+                                    Text("+\(photos.count - 4)")
+                                        .font(NightOutTypography.headline)
+                                        .foregroundStyle(NightOutColors.chrome)
+                                }
+                                .frame(width: 80, height: 80)
+                            }
+                        }
+                    }
+                }
+
                 // Stats row
                 HStack(spacing: NightOutSpacing.lg) {
-                    StatBadge(icon: "figure.walk", value: formattedDistance)
-                    StatBadge(icon: "mappin", value: "\(night.currentVenueName ?? "0")")
+                    FeedStatBadge(icon: "figure.walk", value: formattedDistance)
+
+                    if drinkCount > 0 {
+                        FeedStatBadge(icon: "wineglass.fill", value: "\(drinkCount)")
+                    }
+
+                    if let venue = night.currentVenueName {
+                        FeedStatBadge(icon: "mappin", value: venue)
+                    }
                 }
 
                 // Actions row
@@ -74,10 +121,11 @@ struct NightCardView: View {
                         HStack(spacing: NightOutSpacing.xs) {
                             Image(systemName: hasLiked ? "heart.fill" : "heart")
                                 .foregroundStyle(hasLiked ? NightOutColors.liveRed : NightOutColors.silver)
-                            Text("\(night.likeCount)")
+                            Text("\(likeCount)")
                                 .font(NightOutTypography.caption)
                                 .foregroundStyle(NightOutColors.silver)
                         }
+                        .frame(minWidth: 44, minHeight: 44)
                     }
                     .buttonStyle(.plain)
                     .contentShape(Rectangle())
@@ -85,7 +133,7 @@ struct NightCardView: View {
                     // Comment indicator
                     HStack(spacing: NightOutSpacing.xs) {
                         Image(systemName: "bubble.right")
-                        Text("View")
+                        Text("\(commentCount)")
                             .font(NightOutTypography.caption)
                     }
                     .foregroundStyle(NightOutColors.silver)
@@ -94,10 +142,11 @@ struct NightCardView: View {
 
                     // Share button
                     Button {
-                        // TODO: Share sheet
+                        shareNight()
                     } label: {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(NightOutColors.silver)
+                            .frame(minWidth: 44, minHeight: 44)
                     }
                     .buttonStyle(.plain)
                     .contentShape(Rectangle())
@@ -106,8 +155,7 @@ struct NightCardView: View {
             }
         }
         .task {
-            await loadProfile()
-            await checkLikeStatus()
+            await loadData()
         }
     }
 
@@ -137,19 +185,15 @@ struct NightCardView: View {
 
     // MARK: - Actions
 
-    private func loadProfile() async {
+    private func loadData() async {
         do {
             profile = try await UserService.shared.getProfile(userId: night.userId)
-        } catch {
-            print("Error loading profile: \(error)")
-        }
-    }
-
-    private func checkLikeStatus() async {
-        do {
             hasLiked = try await ReactionService.shared.hasLiked(nightId: night.id)
+            commentCount = try await CommentService.shared.getCommentCount(nightId: night.id)
+            drinkCount = try await DrinkService.shared.getDrinkCount(nightId: night.id)
+            photos = try await MediaService.shared.getMedia(nightId: night.id)
         } catch {
-            print("Error checking like: \(error)")
+            print("Error loading card data: \(error)")
         }
     }
 
@@ -158,8 +202,10 @@ struct NightCardView: View {
             do {
                 if hasLiked {
                     try await ReactionService.shared.unlikeNight(nightId: night.id)
+                    likeCount -= 1
                 } else {
                     try await ReactionService.shared.likeNight(nightId: night.id)
+                    likeCount += 1
                 }
                 hasLiked.toggle()
                 NightOutHaptics.light()
@@ -168,11 +214,16 @@ struct NightCardView: View {
             }
         }
     }
+
+    private func shareNight() {
+        // TODO: Implement share sheet
+        NightOutHaptics.light()
+    }
 }
 
-// MARK: - Stat Badge
+// MARK: - Feed Stat Badge
 @MainActor
-struct StatBadge: View {
+struct FeedStatBadge: View {
     let icon: String
     let value: String
 
@@ -182,6 +233,7 @@ struct StatBadge: View {
                 .font(.system(size: 12))
             Text(value)
                 .font(NightOutTypography.caption)
+                .lineLimit(1)
         }
         .foregroundStyle(NightOutColors.silver)
     }

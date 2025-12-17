@@ -187,6 +187,19 @@ enum NightOutAnimation {
 
     // Pulse animation for live indicators
     static let pulse = Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)
+
+    // Ultra-polish animations
+    static let rubberBand = Animation.spring(response: 0.3, dampingFraction: 0.5)
+    static let smoothSpring = Animation.spring(response: 0.4, dampingFraction: 0.8)
+    static let snappy = Animation.spring(response: 0.25, dampingFraction: 0.7)
+
+    // Stagger helper for list animations
+    static func stagger(index: Int, baseDelay: Double = 0.05) -> Animation {
+        .easeOut(duration: 0.3).delay(Double(index) * baseDelay)
+    }
+
+    // Float animation for empty states
+    static let float = Animation.easeInOut(duration: 2.0).repeatForever(autoreverses: true)
 }
 
 // MARK: - Common Emoji Constants
@@ -246,6 +259,7 @@ extension View {
     func beatPulse(intensity: Double = 0.5, bpm: Double = 120) -> some View {
         self.modifier(BeatPulseModifier(intensity: intensity, bpm: bpm))
     }
+
     /// Apply standard card styling with glass effect
     func glassCard() -> some View {
         self
@@ -267,6 +281,26 @@ extension View {
     func shadow(_ shadow: Shadow) -> some View {
         self.shadow(color: shadow.color, radius: shadow.radius, x: shadow.x, y: shadow.y)
     }
+
+    /// Apply press animation (scale down on press)
+    func pressAnimation(scale: CGFloat = 0.95) -> some View {
+        self.modifier(PressAnimationModifier(scale: scale))
+    }
+
+    /// Apply appear animation (fade + slide up)
+    func appearAnimation(delay: Double = 0) -> some View {
+        self.modifier(AppearAnimationModifier(delay: delay))
+    }
+
+    /// Apply floating animation for empty states
+    func floatingAnimation(offset: CGFloat = 8) -> some View {
+        self.modifier(FloatingAnimationModifier(offset: offset))
+    }
+
+    /// Apply stagger animation for list items
+    func staggerAnimation(index: Int, baseDelay: Double = 0.05) -> some View {
+        self.modifier(StaggerAnimationModifier(index: index, baseDelay: baseDelay))
+    }
 }
 
 // MARK: - Beat Pulse Modifier
@@ -285,5 +319,110 @@ struct BeatPulseModifier: ViewModifier {
                     isPulsing = true
                 }
             }
+    }
+}
+
+// MARK: - Press Animation Modifier
+struct PressAnimationModifier: ViewModifier {
+    let scale: CGFloat
+    @State private var isPressed = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(isPressed && !reduceMotion ? scale : 1.0)
+            .animation(NightOutAnimation.snappy, value: isPressed)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in isPressed = true }
+                    .onEnded { _ in isPressed = false }
+            )
+    }
+}
+
+// MARK: - Appear Animation Modifier
+struct AppearAnimationModifier: ViewModifier {
+    let delay: Double
+    @State private var hasAppeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(hasAppeared || reduceMotion ? 1 : 0)
+            .offset(y: hasAppeared || reduceMotion ? 0 : 20)
+            .onAppear {
+                guard !reduceMotion else {
+                    hasAppeared = true
+                    return
+                }
+                withAnimation(NightOutAnimation.smoothSpring.delay(delay)) {
+                    hasAppeared = true
+                }
+            }
+    }
+}
+
+// MARK: - Floating Animation Modifier
+struct FloatingAnimationModifier: ViewModifier {
+    let offset: CGFloat
+    @State private var isFloating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .offset(y: isFloating && !reduceMotion ? -offset : offset)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(NightOutAnimation.float) {
+                    isFloating = true
+                }
+            }
+    }
+}
+
+// MARK: - Stagger Animation Modifier
+struct StaggerAnimationModifier: ViewModifier {
+    let index: Int
+    let baseDelay: Double
+    @State private var hasAppeared = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(hasAppeared || reduceMotion ? 1 : 0)
+            .offset(y: hasAppeared || reduceMotion ? 0 : 15)
+            .scaleEffect(hasAppeared || reduceMotion ? 1 : 0.95)
+            .onAppear {
+                guard !reduceMotion else {
+                    hasAppeared = true
+                    return
+                }
+                withAnimation(NightOutAnimation.stagger(index: index, baseDelay: baseDelay)) {
+                    hasAppeared = true
+                }
+            }
+    }
+}
+
+// MARK: - Animated Counter
+/// Animates number changes with spring animation
+@MainActor
+struct AnimatedCounter: View {
+    let value: Int
+    let font: Font
+    let color: Color
+
+    init(value: Int, font: Font = NightOutTypography.statNumber, color: Color = NightOutColors.chrome) {
+        self.value = value
+        self.font = font
+        self.color = color
+    }
+
+    var body: some View {
+        Text("\(value)")
+            .font(font)
+            .foregroundStyle(color)
+            .contentTransition(.numericText(value: value))
+            .animation(NightOutAnimation.smoothSpring, value: value)
     }
 }

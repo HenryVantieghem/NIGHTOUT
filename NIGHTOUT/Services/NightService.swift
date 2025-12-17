@@ -69,7 +69,7 @@ final class NightService: @unchecked Sendable {
         return response.first
     }
 
-    /// Get feed of friends' nights
+    /// Get combined feed (user's nights + friends' nights)
     func getFeed(userId: UUID, limit: Int = 50) async throws -> [SupabaseNight] {
         guard let client else { throw ServiceError.notConfigured }
 
@@ -84,15 +84,68 @@ final class NightService: @unchecked Sendable {
 
         let friendIds = friendships.map { $0.friendUserId }
 
+        // Include user's own ID for combined feed
+        var allUserIds = friendIds
+        allUserIds.append(userId)
+
+        // Get all public/completed nights from user and friends
+        let response: [SupabaseNight] = try await client
+            .from("nights")
+            .select()
+            .in("user_id", values: allUserIds)
+            .eq("is_active", value: false)
+            .order("start_time", ascending: false)
+            .limit(limit)
+            .execute()
+            .value
+
+        return response
+    }
+
+    /// Get only friends' nights (following filter)
+    func getFriendsFeed(userId: UUID, limit: Int = 50) async throws -> [SupabaseNight] {
+        guard let client else { throw ServiceError.notConfigured }
+
+        // Get friend IDs
+        let friendships: [SupabaseFriendship] = try await client
+            .from("friendships")
+            .select()
+            .eq("user_id", value: userId)
+            .eq("status", value: "accepted")
+            .execute()
+            .value
+
+        let friendIds = friendships.map { $0.friendUserId }
+
         guard !friendIds.isEmpty else { return [] }
 
-        // Get friends' public nights
+        // Get friends' public nights only
         let response: [SupabaseNight] = try await client
             .from("nights")
             .select()
             .in("user_id", values: friendIds)
             .eq("is_public", value: true)
             .eq("is_active", value: false)
+            .order("start_time", ascending: false)
+            .limit(limit)
+            .execute()
+            .value
+
+        return response
+    }
+
+    /// Get highlighted/popular nights (high like count)
+    func getHighlights(limit: Int = 20) async throws -> [SupabaseNight] {
+        guard let client else { throw ServiceError.notConfigured }
+
+        // Get public nights sorted by like count
+        let response: [SupabaseNight] = try await client
+            .from("nights")
+            .select()
+            .eq("is_public", value: true)
+            .eq("is_active", value: false)
+            .gt("like_count", value: 0)
+            .order("like_count", ascending: false)
             .order("start_time", ascending: false)
             .limit(limit)
             .execute()

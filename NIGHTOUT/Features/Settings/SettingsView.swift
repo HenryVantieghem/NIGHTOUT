@@ -5,6 +5,8 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showLogoutConfirmation = false
+    @State private var profile: SupabaseProfile?
+    @State private var showEditProfile = false
 
     var body: some View {
         NavigationStack {
@@ -14,11 +16,13 @@ struct SettingsView: View {
                     SectionHeader("Account")
 
                     VStack(spacing: 0) {
-                        NavigationLink {
-                            Text("Edit Profile") // Placeholder - EditProfileView used elsewhere
+                        Button {
+                            showEditProfile = true
                         } label: {
                             SettingsRow(title: "Edit Profile", icon: "person")
                         }
+                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
                     }
                     .background(NightOutColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.md))
@@ -113,6 +117,18 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Are you sure you want to sign out?")
+            }
+            .sheet(isPresented: $showEditProfile) {
+                if let profile {
+                    EditProfileView(profile: profile)
+                }
+            }
+            .task {
+                do {
+                    profile = try await UserService.shared.getCurrentProfile()
+                } catch {
+                    print("Error loading profile: \(error)")
+                }
             }
         }
     }

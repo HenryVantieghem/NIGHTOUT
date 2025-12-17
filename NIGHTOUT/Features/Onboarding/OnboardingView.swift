@@ -364,7 +364,8 @@ struct ReadyStepView: View {
                 // Button
                 GlassButton("Let's Go!", icon: "party.popper", style: .prominent, size: .large) {
                     showConfetti = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    Task { @MainActor in
+                        try? await Task.sleep(nanoseconds: 500_000_000)
                         onComplete()
                     }
                 }
@@ -375,10 +376,9 @@ struct ReadyStepView: View {
             // Confetti overlay
             ConfettiView(isShowing: $showConfetti)
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                checkmarkShowing = true
-            }
+        .task {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            checkmarkShowing = true
         }
     }
 }
