@@ -11,7 +11,7 @@ struct LiveView: View {
     @State private var selectedFriend: LiveFriendData?
     @State private var isLoading = true
     @State private var showReactionMenu = false
-    @State private var sheetDetent: PresentationDetent = .fraction(0.25)
+    @State private var sheetDetent: PresentationDetent = .fraction(0.3)
 
     // Real-time subscriptions
     private let realtimeManager = SupabaseRealtimeManager.shared
@@ -54,9 +54,13 @@ struct LiveView: View {
                     }
                 }
             }
+            .safeAreaInset(edge: .bottom) {
+                // Space for tab bar
+                Color.clear.frame(height: 90)
+            }
             .sheet(isPresented: .constant(true)) {
                 friendsListSheet
-                    .presentationDetents([.fraction(0.25), .fraction(0.5), .large], selection: $sheetDetent)
+                    .presentationDetents([.fraction(0.3), .fraction(0.5), .large], selection: $sheetDetent)
                     .presentationDragIndicator(.visible)
                     .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.5)))
                     .interactiveDismissDisabled()
@@ -266,7 +270,7 @@ struct LiveView: View {
                                             pitch: 45
                                         ))
                                     }
-                                    sheetDetent = .fraction(0.25)
+                                    sheetDetent = .fraction(0.3)
                                 }
                             }
                         }
@@ -364,17 +368,14 @@ struct LiveView: View {
 
     private func updateFriendsFromRealtimeLocations(_ locations: [FriendLocation]) {
         // Update existing friends with real-time location data
-        for location in locations {
-            if let index = liveFriends.firstIndex(where: { $0.night.userId == location.userId }) {
-                // Create updated night with new location
-                var updatedNight = liveFriends[index].night
-                // Note: We'd need to update the night's location fields
-                // For now, we'll refetch to get the latest data
-            }
+        // Note: SupabaseNight is immutable, so we refetch to get latest data
+        // The location matching just validates we have friends to update
+        let hasMatchingFriends = locations.contains { location in
+            liveFriends.contains { $0.night.userId == location.userId }
         }
 
-        // If we have new locations, refetch to sync
-        if !locations.isEmpty {
+        // If we have new locations for our friends, refetch to sync
+        if !locations.isEmpty || hasMatchingFriends {
             Task {
                 await loadLiveFriends()
             }

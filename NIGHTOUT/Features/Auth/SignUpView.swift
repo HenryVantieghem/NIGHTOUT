@@ -129,12 +129,10 @@ struct SignUpView: View {
             } message: {
                 Text(errorMessage)
             }
-            .alert("Account Created", isPresented: $showSuccess) {
-                Button("OK") {
+            .onChange(of: showSuccess) { _, success in
+                if success {
                     dismiss()
                 }
-            } message: {
-                Text("Check your email to verify your account, then sign in.")
             }
         }
     }
@@ -186,6 +184,9 @@ struct SignUpView: View {
                 username: username,
                 displayName: displayName
             )
+
+            // Restore session so RootView updates
+            await SessionManager.shared.restoreSession()
 
             NightOutHaptics.success()
             showSuccess = true

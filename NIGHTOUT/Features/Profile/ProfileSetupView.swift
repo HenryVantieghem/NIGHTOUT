@@ -257,11 +257,10 @@ private struct AvatarStep: View {
                 }
 
                 // Camera button overlay
-                let captionFont = NightOutTypography.caption
-                let silverColor = NightOutColors.silver
+                let neonPinkColor = NightOutColors.neonPink
                 PhotosPicker(selection: $selectedPhoto, matching: .images, photoLibrary: .shared()) {
                     Circle()
-                        .fill(NightOutColors.neonPink)
+                        .fill(neonPinkColor)
                         .frame(width: 44, height: 44)
                         .overlay(
                             Image(systemName: "camera.fill")

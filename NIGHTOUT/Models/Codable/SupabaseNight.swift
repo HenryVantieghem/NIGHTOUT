@@ -126,6 +126,7 @@ struct SupabaseNightInsert: Codable, Sendable {
     let id: UUID
     let userId: UUID
     let startTime: Date
+    let isActive: Bool
     var startLatitude: Double?
     var startLongitude: Double?
     let visibility: String
@@ -135,6 +136,7 @@ struct SupabaseNightInsert: Codable, Sendable {
         case id
         case userId = "user_id"
         case startTime = "start_time"
+        case isActive = "is_active"
         case startLatitude = "start_latitude"
         case startLongitude = "start_longitude"
         case visibility
@@ -145,6 +147,7 @@ struct SupabaseNightInsert: Codable, Sendable {
         id: UUID = UUID(),
         userId: UUID,
         startTime: Date = Date(),
+        isActive: Bool = true,
         startLatitude: Double? = nil,
         startLongitude: Double? = nil,
         visibility: NightVisibility = .friends,
@@ -153,6 +156,7 @@ struct SupabaseNightInsert: Codable, Sendable {
         self.id = id
         self.userId = userId
         self.startTime = startTime
+        self.isActive = isActive
         self.startLatitude = startLatitude
         self.startLongitude = startLongitude
         self.visibility = visibility.rawValue
