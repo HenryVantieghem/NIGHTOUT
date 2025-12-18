@@ -1,13 +1,17 @@
 import SwiftUI
 
-/// Personal statistics dashboard
+/// Personal statistics dashboard - Pixel-perfect redesign
 @MainActor
 struct StatsView: View {
     @State private var profile: SupabaseProfile?
     @State private var nights: [SupabaseNight] = []
     @State private var isLoading = true
-    @State private var selectedPeriod: StatsPeriod = .allTime
     @State private var showAchievements = false
+
+    private let gridColumns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
 
     var body: some View {
         NavigationStack {
@@ -16,27 +20,19 @@ struct StatsView: View {
                     LoadingView()
                 } else if let profile {
                     ScrollView {
-                        VStack(spacing: NightOutSpacing.lg) {
-                            // Period selector
-                            periodSelector
+                        VStack(spacing: NightOutSpacing.xxl) {
+                            // All Time section
+                            allTimeSection(profile: profile)
 
-                            // Main stats
-                            mainStatsCard(profile: profile)
+                            // This Month section
+                            thisMonthSection
 
-                            // Weekly activity chart
-                            weeklyActivityCard
+                            // Achievements section
+                            achievementsSection(profile: profile)
 
-                            // Streaks
-                            streaksCard(profile: profile)
-
-                            // Insights
-                            insightsCard
-
-                            // Achievements
-                            achievementsCard(profile: profile)
+                            Spacer(minLength: NightOutSpacing.tabBarTotal)
                         }
-                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
-                        .padding(.vertical, NightOutSpacing.lg)
+                        .padding(.top, NightOutSpacing.lg)
                     }
                     .refreshable {
                         await loadData()
@@ -51,7 +47,7 @@ struct StatsView: View {
             }
             .nightOutBackground()
             .navigationTitle("Stats")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showAchievements) {
                 AchievementsListView()
             }
@@ -61,321 +57,100 @@ struct StatsView: View {
         }
     }
 
-    // MARK: - Period Selector
+    // MARK: - All Time Section
 
-    private var periodSelector: some View {
-        HStack(spacing: NightOutSpacing.sm) {
-            ForEach(StatsPeriod.allCases, id: \.self) { period in
-                Button {
-                    selectedPeriod = period
-                    NightOutHaptics.light()
-                } label: {
-                    Text(period.displayName)
-                        .font(NightOutTypography.subheadline)
-                        .fontWeight(selectedPeriod == period ? .semibold : .regular)
-                        .foregroundStyle(selectedPeriod == period ? NightOutColors.chrome : NightOutColors.silver)
-                        .padding(.horizontal, NightOutSpacing.md)
-                        .padding(.vertical, NightOutSpacing.sm)
-                        .background(selectedPeriod == period ? NightOutColors.neonPink.opacity(0.2) : Color.clear)
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(selectedPeriod == period ? NightOutColors.neonPink : Color.clear, lineWidth: 1)
-                        )
-                }
-                .buttonStyle(.plain)
-                .contentShape(Rectangle())
+    private func allTimeSection(profile: SupabaseProfile) -> some View {
+        VStack(spacing: NightOutSpacing.md) {
+            UltraSectionHeader(title: "ALL TIME")
+
+            LazyVGrid(columns: gridColumns, spacing: 12) {
+                StatCard(emoji: Emoji.nights, value: "\(profile.totalNights)", label: "Nights")
+                StatCard(emoji: Emoji.time, value: formattedTotalTime(profile), label: "Total")
+                StatCard(emoji: Emoji.distance, value: formattedDistance(profile), label: "Distance")
+                StatCard(emoji: Emoji.drinks, value: "\(profile.totalDrinks)", label: "Drinks")
+                StatCard(emoji: Emoji.songs, value: "\(profile.totalSongs)", label: "Songs")
+                StatCard(emoji: Emoji.photos, value: "\(profile.totalPhotos)", label: "Photos")
             }
-            Spacer()
+            .padding(.horizontal, NightOutSpacing.screenHorizontal)
         }
     }
 
-    // MARK: - Main Stats Card
+    // MARK: - This Month Section
 
-    private func mainStatsCard(profile: SupabaseProfile) -> some View {
-        GlassCard {
-            VStack(spacing: NightOutSpacing.lg) {
-                Text(selectedPeriod == .allTime ? "All Time Stats" : "\(selectedPeriod.displayName) Stats")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
+    private var thisMonthSection: some View {
+        VStack(spacing: NightOutSpacing.md) {
+            UltraSectionHeader(
+                title: "THIS MONTH",
+                rightText: currentMonthYear
+            )
 
-                LazyVGrid(columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ], spacing: NightOutSpacing.lg) {
-                    StatsGridCard(value: "\(filteredNights.count)", label: "Nights", icon: "moon.stars")
-                    StatsGridCard(value: formattedTotalDuration, label: "Total Time", icon: "clock")
-                    StatsGridCard(value: formattedTotalDistance, label: "Distance", icon: "figure.walk")
-                    StatsGridCard(value: "\(filteredDrinkCount)", label: "Drinks", icon: "cup.and.saucer")
-                    StatsGridCard(value: "\(profile.totalPhotos)", label: "Photos", icon: "camera")
-                    StatsGridCard(value: averageNightDuration, label: "Avg Duration", icon: "timer")
-                }
-            }
+            ActivityChartCard()
+                .padding(.horizontal, NightOutSpacing.screenHorizontal)
         }
     }
 
-    // MARK: - Weekly Activity Card
+    // MARK: - Achievements Section
 
-    private var weeklyActivityCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-                Text("Weekly Activity")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
+    private func achievementsSection(profile: SupabaseProfile) -> some View {
+        VStack(spacing: NightOutSpacing.md) {
+            UltraSectionHeader(
+                title: "ACHIEVEMENTS",
+                rightText: "See All",
+                rightAction: { showAchievements = true }
+            )
 
-                HStack(alignment: .bottom, spacing: NightOutSpacing.sm) {
-                    ForEach(weekdayData, id: \.day) { item in
-                        VStack(spacing: NightOutSpacing.xs) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(item.count > 0 ? NightOutColors.neonPink : NightOutColors.surface)
-                                .frame(width: 36, height: max(8, CGFloat(item.count) * 24))
-                                .animation(.spring(response: 0.3), value: item.count)
-
-                            Text(item.day)
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 100, alignment: .bottom)
+            // Preview of 4 achievements
+            HStack(spacing: NightOutSpacing.md) {
+                AchievementPreviewIcon(
+                    icon: "star.fill",
+                    title: "First Night",
+                    unlocked: profile.totalNights >= 1
+                )
+                AchievementPreviewIcon(
+                    icon: "flame.fill",
+                    title: "Week Streak",
+                    unlocked: profile.longestStreak >= 7
+                )
+                AchievementPreviewIcon(
+                    icon: "camera.fill",
+                    title: "Photographer",
+                    unlocked: profile.totalPhotos >= 10
+                )
+                AchievementPreviewIcon(
+                    icon: "figure.walk",
+                    title: "Marathon",
+                    unlocked: profile.totalDistance >= 10000
+                )
             }
-        }
-    }
-
-    // MARK: - Streaks Card
-
-    private func streaksCard(profile: SupabaseProfile) -> some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-                Text("Streaks")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                HStack(spacing: NightOutSpacing.xxl) {
-                    VStack(spacing: NightOutSpacing.xs) {
-                        HStack(spacing: NightOutSpacing.xs) {
-                            Image(systemName: "flame.fill")
-                                .foregroundStyle(NightOutColors.goldenHour)
-                            Text("\(profile.currentStreak)")
-                                .font(NightOutTypography.title)
-                        }
-                        .foregroundStyle(NightOutColors.chrome)
-
-                        Text("Current")
-                            .font(NightOutTypography.caption)
-                            .foregroundStyle(NightOutColors.silver)
-                    }
-
-                    VStack(spacing: NightOutSpacing.xs) {
-                        HStack(spacing: NightOutSpacing.xs) {
-                            Image(systemName: "crown.fill")
-                                .foregroundStyle(NightOutColors.goldenHour)
-                            Text("\(profile.longestStreak)")
-                                .font(NightOutTypography.title)
-                        }
-                        .foregroundStyle(NightOutColors.chrome)
-
-                        Text("Best")
-                            .font(NightOutTypography.caption)
-                            .foregroundStyle(NightOutColors.silver)
-                    }
-
-                    Spacer()
-
-                    // Streak indicator
-                    if profile.currentStreak > 0 {
-                        VStack(spacing: NightOutSpacing.xs) {
-                            Image(systemName: "flame.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(
-                                    profile.currentStreak >= 7
-                                        ? NightOutColors.goldenHour
-                                        : NightOutColors.neonPink
-                                )
-                                .symbolEffect(.pulse)
-
-                            Text(streakMessage)
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    // MARK: - Insights Card
-
-    private var insightsCard: some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-                Text("Insights")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                VStack(spacing: NightOutSpacing.sm) {
-                    StatsInsightRow(icon: "clock.fill", label: "Average night duration", value: averageNightDuration)
-                    StatsInsightRow(icon: "calendar", label: "Most active day", value: mostActiveDay)
-                    StatsInsightRow(icon: "figure.walk", label: "Average distance", value: averageDistance)
-                    StatsInsightRow(icon: "wineglass.fill", label: "Drinks per night", value: drinksPerNight)
-                }
-            }
-        }
-    }
-
-    // MARK: - Achievements Card
-
-    private func achievementsCard(profile: SupabaseProfile) -> some View {
-        GlassCard {
-            VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-                HStack {
-                    Text("Achievements")
-                        .font(NightOutTypography.headline)
-                        .foregroundStyle(NightOutColors.chrome)
-
-                    Spacer()
-
-                    Button {
-                        showAchievements = true
-                    } label: {
-                        Text("See All")
-                            .font(NightOutTypography.caption)
-                            .foregroundStyle(NightOutColors.neonPink)
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-                }
-
-                HStack(spacing: NightOutSpacing.md) {
-                    StatsAchievementIcon(
-                        icon: "star.fill",
-                        title: "First Night",
-                        unlocked: profile.totalNights >= 1
-                    )
-                    StatsAchievementIcon(
-                        icon: "flame.fill",
-                        title: "Week Streak",
-                        unlocked: profile.longestStreak >= 7
-                    )
-                    StatsAchievementIcon(
-                        icon: "camera.fill",
-                        title: "Photographer",
-                        unlocked: profile.totalPhotos >= 10
-                    )
-                    StatsAchievementIcon(
-                        icon: "figure.walk",
-                        title: "Marathon",
-                        unlocked: profile.totalDistance >= 10000
-                    )
-                }
-                .frame(maxWidth: .infinity)
-            }
+            .padding(.horizontal, NightOutSpacing.screenHorizontal)
         }
     }
 
     // MARK: - Computed Properties
 
-    private var filteredNights: [SupabaseNight] {
-        let calendar = Calendar.current
-        let now = Date()
+    private var currentMonthYear: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter.string(from: Date())
+    }
 
-        switch selectedPeriod {
-        case .allTime:
-            return nights
-        case .thisMonth:
-            return nights.filter { calendar.isDate($0.startTime, equalTo: now, toGranularity: .month) }
-        case .thisWeek:
-            return nights.filter { calendar.isDate($0.startTime, equalTo: now, toGranularity: .weekOfYear) }
+    private func formattedTotalTime(_ profile: SupabaseProfile) -> String {
+        let totalSeconds = nights.reduce(0) { $0 + $1.duration }
+        let hours = totalSeconds / 3600
+        if hours >= 1 {
+            return "\(hours)h"
         }
-    }
-
-    private var formattedTotalDuration: String {
-        let total = filteredNights.reduce(0) { $0 + $1.duration }
-        let hours = total / 3600
-        return "\(hours)h"
-    }
-
-    private var formattedTotalDistance: String {
-        let total = filteredNights.reduce(0.0) { $0 + $1.distance }
-        return String(format: "%.0f km", total / 1000)
-    }
-
-    private var filteredDrinkCount: Int {
-        guard let profile else { return 0 }
-        if selectedPeriod == .allTime {
-            return profile.totalDrinks
-        }
-        let ratio = Double(filteredNights.count) / max(1, Double(nights.count))
-        return Int(Double(profile.totalDrinks) * ratio)
-    }
-
-    private var averageNightDuration: String {
-        guard !filteredNights.isEmpty else { return "0h" }
-        let avg = filteredNights.reduce(0) { $0 + $1.duration } / filteredNights.count
-        let hours = avg / 3600
-        let minutes = (avg % 3600) / 60
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        }
+        let minutes = totalSeconds / 60
         return "\(minutes)m"
     }
 
-    private var averageDistance: String {
-        guard !filteredNights.isEmpty else { return "0 m" }
-        let avg = filteredNights.reduce(0.0) { $0 + $1.distance } / Double(filteredNights.count)
-        if avg >= 1000 {
-            return String(format: "%.1f km", avg / 1000)
+    private func formattedDistance(_ profile: SupabaseProfile) -> String {
+        let totalMeters = profile.totalDistance
+        if totalMeters >= 1609 { // 1 mile in meters
+            let miles = totalMeters / 1609.34
+            return String(format: "%.1f mi", miles)
         }
-        return String(format: "%.0f m", avg)
-    }
-
-    private var mostActiveDay: String {
-        guard !nights.isEmpty else { return "N/A" }
-        let calendar = Calendar.current
-        var dayCounts: [Int: Int] = [:]
-
-        for night in nights {
-            let weekday = calendar.component(.weekday, from: night.startTime)
-            dayCounts[weekday, default: 0] += 1
-        }
-
-        let maxDay = dayCounts.max(by: { $0.value < $1.value })?.key ?? 1
-        let formatter = DateFormatter()
-        return formatter.weekdaySymbols[maxDay - 1]
-    }
-
-    private var drinksPerNight: String {
-        guard !filteredNights.isEmpty else { return "0" }
-        let avg = Double(filteredDrinkCount) / Double(filteredNights.count)
-        return String(format: "%.1f", avg)
-    }
-
-    private var weekdayData: [(day: String, count: Int)] {
-        let calendar = Calendar.current
-        let symbols = ["M", "T", "W", "T", "F", "S", "S"]
-
-        var counts: [Int: Int] = [:]
-        for night in nights {
-            let weekday = calendar.component(.weekday, from: night.startTime)
-            let adjustedDay = weekday == 1 ? 7 : weekday - 1
-            counts[adjustedDay, default: 0] += 1
-        }
-
-        return (1...7).map { day in
-            (day: symbols[day - 1], count: counts[day] ?? 0)
-        }
-    }
-
-    private var streakMessage: String {
-        guard let profile else { return "" }
-        if profile.currentStreak >= 7 {
-            return "On fire!"
-        } else if profile.currentStreak >= 3 {
-            return "Keep it up!"
-        }
-        return "Building..."
+        return String(format: "%.0f m", totalMeters)
     }
 
     // MARK: - Actions
@@ -391,53 +166,10 @@ struct StatsView: View {
     }
 }
 
-// MARK: - Stats Period
-
-enum StatsPeriod: String, CaseIterable {
-    case allTime = "all"
-    case thisMonth = "month"
-    case thisWeek = "week"
-
-    var displayName: String {
-        switch self {
-        case .allTime: return "All Time"
-        case .thisMonth: return "This Month"
-        case .thisWeek: return "This Week"
-        }
-    }
-}
-
-// MARK: - Stats Grid Card
+// MARK: - Achievement Preview Icon
 
 @MainActor
-struct StatsGridCard: View {
-    let value: String
-    let label: String
-    let icon: String
-
-    var body: some View {
-        VStack(spacing: NightOutSpacing.sm) {
-            Image(systemName: icon)
-                .font(.system(size: 20))
-                .foregroundStyle(NightOutColors.neonPink)
-
-            Text(value)
-                .font(NightOutTypography.title2)
-                .foregroundStyle(NightOutColors.chrome)
-
-            Text(label)
-                .font(NightOutTypography.caption)
-                .foregroundStyle(NightOutColors.silver)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, NightOutSpacing.md)
-    }
-}
-
-// MARK: - Stats Achievement Icon
-
-@MainActor
-struct StatsAchievementIcon: View {
+struct AchievementPreviewIcon: View {
     let icon: String
     let title: String
     let unlocked: Bool
@@ -456,34 +188,7 @@ struct StatsAchievementIcon: View {
                 .foregroundStyle(unlocked ? NightOutColors.chrome : NightOutColors.dimmed)
                 .lineLimit(1)
         }
-    }
-}
-
-// MARK: - Stats Insight Row
-
-@MainActor
-struct StatsInsightRow: View {
-    let icon: String
-    let label: String
-    let value: String
-
-    var body: some View {
-        HStack {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundStyle(NightOutColors.neonPink)
-                .frame(width: 24)
-
-            Text(label)
-                .font(NightOutTypography.body)
-                .foregroundStyle(NightOutColors.silver)
-
-            Spacer()
-
-            Text(value)
-                .font(NightOutTypography.headline)
-                .foregroundStyle(NightOutColors.chrome)
-        }
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -520,7 +225,7 @@ struct AchievementsListView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundStyle(NightOutColors.neonPink)
+                    .foregroundStyle(NightOutColors.partyPurple)
                 }
             }
         }
@@ -543,14 +248,14 @@ struct AchievementListRow: View {
         case .tenNights: return profile.totalNights >= 10
         case .fiftyNights: return profile.totalNights >= 50
         case .hundredNights: return profile.totalNights >= 100
-        case .firstFriend: return false // Would need friend count
+        case .firstFriend: return false
         case .tenFriends: return false
         case .socialButterfly: return false
         case .weekStreak: return profile.longestStreak >= 7
         case .monthStreak: return profile.longestStreak >= 30
         case .marathoner: return profile.totalDistance >= 42000
-        case .explorer: return false // Would need venue count
-        case .nightOwl: return false // Would need time check
+        case .explorer: return false
+        case .nightOwl: return false
         case .earlyBird: return false
         case .photoGenic: return profile.totalPhotos >= 100
         }
@@ -576,48 +281,127 @@ struct AchievementListRow: View {
     }
 
     var body: some View {
-        GlassCard {
-            HStack(spacing: NightOutSpacing.md) {
-                Image(systemName: achievementType.icon)
-                    .font(.system(size: 28))
-                    .foregroundStyle(isUnlocked ? NightOutColors.goldenHour : NightOutColors.dimmed)
-                    .frame(width: 56, height: 56)
-                    .background(isUnlocked ? NightOutColors.goldenHour.opacity(0.2) : NightOutColors.surface)
-                    .clipShape(Circle())
+        HStack(spacing: NightOutSpacing.md) {
+            Image(systemName: achievementType.icon)
+                .font(.system(size: 28))
+                .foregroundStyle(isUnlocked ? NightOutColors.goldenHour : NightOutColors.dimmed)
+                .frame(width: 56, height: 56)
+                .background(isUnlocked ? NightOutColors.goldenHour.opacity(0.2) : NightOutColors.surface)
+                .clipShape(Circle())
 
-                VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                    Text(achievementType.displayName)
-                        .font(NightOutTypography.headline)
-                        .foregroundStyle(isUnlocked ? NightOutColors.chrome : NightOutColors.silver)
+            VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
+                Text(achievementType.displayName)
+                    .font(NightOutTypography.headline)
+                    .foregroundStyle(isUnlocked ? NightOutColors.chrome : NightOutColors.silver)
 
-                    Text(achievementType.description)
-                        .font(NightOutTypography.caption)
-                        .foregroundStyle(NightOutColors.dimmed)
+                Text(achievementType.description)
+                    .font(NightOutTypography.caption)
+                    .foregroundStyle(NightOutColors.dimmed)
 
-                    if !isUnlocked {
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(NightOutColors.surface)
-                                    .frame(height: 4)
+                if !isUnlocked {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(NightOutColors.surface)
+                                .frame(height: 4)
 
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(NightOutColors.neonPink)
-                                    .frame(width: geo.size.width * progress, height: 4)
-                            }
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(NightOutColors.neonPink)
+                                .frame(width: geo.size.width * progress, height: 4)
                         }
-                        .frame(height: 4)
                     }
-                }
-
-                Spacer()
-
-                if isUnlocked {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(NightOutColors.successGreen)
+                    .frame(height: 4)
                 }
             }
+
+            Spacer()
+
+            if isUnlocked {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundStyle(NightOutColors.successGreen)
+            }
+        }
+        .padding(NightOutSpacing.md)
+        .background(NightOutColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.card))
+    }
+}
+
+// MARK: - Achievement Type
+
+enum AchievementType: String, CaseIterable, Identifiable {
+    case firstNight
+    case tenNights
+    case fiftyNights
+    case hundredNights
+    case firstFriend
+    case tenFriends
+    case socialButterfly
+    case weekStreak
+    case monthStreak
+    case marathoner
+    case explorer
+    case nightOwl
+    case earlyBird
+    case photoGenic
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .firstNight: return "First Night Out"
+        case .tenNights: return "Night Owl"
+        case .fiftyNights: return "Party Animal"
+        case .hundredNights: return "Legend"
+        case .firstFriend: return "First Friend"
+        case .tenFriends: return "Social Starter"
+        case .socialButterfly: return "Social Butterfly"
+        case .weekStreak: return "Week Warrior"
+        case .monthStreak: return "Month Master"
+        case .marathoner: return "Marathoner"
+        case .explorer: return "Explorer"
+        case .nightOwl: return "Night Owl"
+        case .earlyBird: return "Early Bird"
+        case .photoGenic: return "Photogenic"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .firstNight: return "Complete your first night out"
+        case .tenNights: return "Complete 10 nights out"
+        case .fiftyNights: return "Complete 50 nights out"
+        case .hundredNights: return "Complete 100 nights out"
+        case .firstFriend: return "Add your first friend"
+        case .tenFriends: return "Add 10 friends"
+        case .socialButterfly: return "Add 50 friends"
+        case .weekStreak: return "Track 7 nights in a row"
+        case .monthStreak: return "Track 30 nights in a row"
+        case .marathoner: return "Walk 42km total"
+        case .explorer: return "Visit 50 different venues"
+        case .nightOwl: return "Stay out past 3am"
+        case .earlyBird: return "Start a night before 6pm"
+        case .photoGenic: return "Take 100 photos"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .firstNight: return "star.fill"
+        case .tenNights: return "moon.stars.fill"
+        case .fiftyNights: return "party.popper.fill"
+        case .hundredNights: return "crown.fill"
+        case .firstFriend: return "person.fill"
+        case .tenFriends: return "person.2.fill"
+        case .socialButterfly: return "person.3.fill"
+        case .weekStreak: return "flame.fill"
+        case .monthStreak: return "flame.circle.fill"
+        case .marathoner: return "figure.walk"
+        case .explorer: return "map.fill"
+        case .nightOwl: return "owl.fill"
+        case .earlyBird: return "sunrise.fill"
+        case .photoGenic: return "camera.fill"
         }
     }
 }

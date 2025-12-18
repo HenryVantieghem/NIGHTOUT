@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// User profile view
+/// User profile view - Pixel-perfect redesign
 @MainActor
 struct ProfileView: View {
     @State private var profile: SupabaseProfile?
@@ -11,6 +11,12 @@ struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showFriends = false
     @State private var showAddFriend = false
+    @State private var showAllNights = false
+
+    private let gridColumns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
 
     var body: some View {
         NavigationStack {
@@ -19,20 +25,29 @@ struct ProfileView: View {
                     ProfileSkeletonView()
                 } else if let profile {
                     ScrollView {
-                        VStack(spacing: NightOutSpacing.lg) {
-                            // Profile header
+                        VStack(spacing: NightOutSpacing.xl) {
+                            // Profile header with avatar
                             profileHeader(profile: profile)
 
                             // Stats row
-                            statsCard(profile: profile)
+                            ProfileStatsRow(
+                                nights: profile.totalNights,
+                                friends: friends.count,
+                                posts: nights.count
+                            )
+                            .padding(.horizontal, NightOutSpacing.screenHorizontal)
 
-                            // Friends section
-                            friendsSection
+                            // Edit profile button
+                            EditProfileButton {
+                                showEditProfile = true
+                            }
 
-                            // My nights section
+                            // Your Nights section
                             nightsSection
+
+                            Spacer(minLength: NightOutSpacing.tabBarTotal)
                         }
-                        .padding(.bottom, NightOutSpacing.xxl)
+                        .padding(.top, NightOutSpacing.lg)
                     }
                     .refreshable {
                         await loadData()
@@ -54,6 +69,7 @@ struct ProfileView: View {
                         showSettings = true
                     } label: {
                         Image(systemName: "gearshape")
+                            .font(.system(size: 20))
                             .foregroundStyle(NightOutColors.chrome)
                     }
                     .buttonStyle(.plain)
@@ -74,6 +90,9 @@ struct ProfileView: View {
             .sheet(isPresented: $showAddFriend) {
                 AddFriendView()
             }
+            .sheet(isPresented: $showAllNights) {
+                AllNightsView(nights: nights)
+            }
         }
         .task {
             await loadData()
@@ -84,135 +103,30 @@ struct ProfileView: View {
 
     private func profileHeader(profile: SupabaseProfile) -> some View {
         VStack(spacing: NightOutSpacing.md) {
-            // Avatar with gradient ring
-            ZStack {
-                Circle()
-                    .stroke(NightOutColors.primaryGradient, lineWidth: 3)
-                    .frame(width: 106, height: 106)
-
-                AvatarView(
-                    url: profile.avatarUrl.flatMap { URL(string: $0) },
-                    name: profile.displayName,
-                    size: 100
-                )
-            }
-
-            VStack(spacing: NightOutSpacing.xs) {
-                Text(profile.displayName)
-                    .font(NightOutTypography.title2)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                Text("@\(profile.username)")
-                    .font(NightOutTypography.body)
-                    .foregroundStyle(NightOutColors.silver)
-            }
-
-            if let bio = profile.bio, !bio.isEmpty {
-                Text(bio)
-                    .font(NightOutTypography.body)
-                    .foregroundStyle(NightOutColors.silver)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, NightOutSpacing.xl)
-            }
-
-            GlassButton("Edit Profile", icon: "pencil", style: .secondary, size: .small) {
+            // Avatar with camera badge
+            AvatarWithBadge(
+                url: profile.avatarUrl.flatMap { URL(string: $0) },
+                name: profile.displayName,
+                size: 100,
+                showCameraBadge: true
+            )
+            .contentShape(Circle())
+            .onTapGesture {
                 showEditProfile = true
             }
-        }
-        .padding(.vertical, NightOutSpacing.lg)
-    }
 
-    // MARK: - Stats Card
+            // Username
+            Text(profile.username)
+                .font(NightOutTypography.title2)
+                .foregroundStyle(NightOutColors.chrome)
 
-    private func statsCard(profile: SupabaseProfile) -> some View {
-        GlassCard {
-            HStack {
-                ProfileStatBox(value: profile.totalNights, label: "Nights")
-                ProfileStatBox(value: friends.count, label: "Friends")
-                ProfileStatBox(value: profile.currentStreak, label: "Streak")
-            }
-        }
-        .padding(.horizontal, NightOutSpacing.screenHorizontal)
-    }
-
-    // MARK: - Friends Section
-
-    private var friendsSection: some View {
-        VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-            HStack {
-                Text("Friends")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                Spacer()
-
-                if !friends.isEmpty {
-                    Button {
-                        showFriends = true
-                    } label: {
-                        Text("See All")
-                            .font(NightOutTypography.caption)
-                            .foregroundStyle(NightOutColors.neonPink)
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-                }
-            }
-            .padding(.horizontal, NightOutSpacing.screenHorizontal)
-
-            if friends.isEmpty {
-                GlassCard {
-                    VStack(spacing: NightOutSpacing.md) {
-                        Image(systemName: "person.2")
-                            .font(.system(size: 32))
-                            .foregroundStyle(NightOutColors.dimmed)
-
-                        Text("No friends yet")
-                            .font(NightOutTypography.body)
-                            .foregroundStyle(NightOutColors.silver)
-
-                        GlassButton("Add Friends", icon: "person.badge.plus", style: .primary, size: .small) {
-                            showAddFriend = true
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, NightOutSpacing.md)
-                }
-                .padding(.horizontal, NightOutSpacing.screenHorizontal)
-            } else {
-                // Friends preview row
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: NightOutSpacing.md) {
-                        // Add friend button
-                        Button {
-                            showAddFriend = true
-                        } label: {
-                            VStack(spacing: NightOutSpacing.xs) {
-                                ZStack {
-                                    Circle()
-                                        .fill(NightOutColors.surface)
-                                        .frame(width: 60, height: 60)
-
-                                    Image(systemName: "plus")
-                                        .font(.system(size: 24))
-                                        .foregroundStyle(NightOutColors.neonPink)
-                                }
-
-                                Text("Add")
-                                    .font(NightOutTypography.caption)
-                                    .foregroundStyle(NightOutColors.silver)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .contentShape(Rectangle())
-
-                        // Friend avatars
-                        ForEach(friends.prefix(6)) { friend in
-                            ProfileFriendAvatar(friendUserId: friend.friendUserId)
-                        }
-                    }
-                    .padding(.horizontal, NightOutSpacing.screenHorizontal)
-                }
+            // Bio
+            if let bio = profile.bio, !bio.isEmpty {
+                Text(bio)
+                    .font(NightOutTypography.subheadline)
+                    .foregroundStyle(NightOutColors.silver)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, NightOutSpacing.xxl)
             }
         }
     }
@@ -220,35 +134,28 @@ struct ProfileView: View {
     // MARK: - Nights Section
 
     private var nightsSection: some View {
-        VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-            SectionHeader("My Nights")
+        VStack(spacing: NightOutSpacing.md) {
+            // Section header
+            UltraSectionHeader(
+                title: "YOUR NIGHTS",
+                rightText: nights.isEmpty ? nil : "See All",
+                rightAction: nights.isEmpty ? nil : { showAllNights = true }
+            )
 
             if nights.isEmpty {
-                GlassCard {
-                    VStack(spacing: NightOutSpacing.sm) {
-                        Image(systemName: "moon.zzz")
-                            .font(.system(size: 32))
-                            .foregroundStyle(NightOutColors.dimmed)
-
-                        Text("No nights yet")
-                            .font(NightOutTypography.body)
-                            .foregroundStyle(NightOutColors.silver)
-
-                        Text("Start tracking to see your nights here!")
-                            .font(NightOutTypography.caption)
-                            .foregroundStyle(NightOutColors.dimmed)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, NightOutSpacing.lg)
-                }
-                .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                emptyNightsView
             } else {
-                LazyVStack(spacing: NightOutSpacing.md) {
-                    ForEach(nights) { night in
+                // Grid of nights
+                LazyVGrid(columns: gridColumns, spacing: 12) {
+                    ForEach(nights.prefix(4)) { night in
                         NavigationLink {
                             NightDetailView(nightId: night.id)
                         } label: {
-                            NightCardView(night: night)
+                            NightGridCard(
+                                duration: formatDuration(night.duration),
+                                title: night.title ?? "Untitled",
+                                date: formatDate(night.startTime)
+                            )
                         }
                         .buttonStyle(.plain)
                         .contentShape(Rectangle())
@@ -257,6 +164,46 @@ struct ProfileView: View {
                 .padding(.horizontal, NightOutSpacing.screenHorizontal)
             }
         }
+    }
+
+    private var emptyNightsView: some View {
+        VStack(spacing: NightOutSpacing.md) {
+            Text(Emoji.moon)
+                .font(.system(size: 48))
+
+            Text("No nights yet")
+                .font(NightOutTypography.headline)
+                .foregroundStyle(NightOutColors.silver)
+
+            Text("Start tracking to see your nights here!")
+                .font(NightOutTypography.caption)
+                .foregroundStyle(NightOutColors.dimmed)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, NightOutSpacing.xxxl)
+        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+        .background(NightOutColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.card))
+        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+    }
+
+    // MARK: - Helpers
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let hours = seconds / 3600
+        let minutes = (seconds % 3600) / 60
+        let secs = seconds % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, secs)
+        }
+        return String(format: "%02d:%02d", minutes, secs)
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMMM d"
+        return formatter.string(from: date)
     }
 
     // MARK: - Actions
@@ -273,50 +220,109 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Profile Stat Box
+// MARK: - All Nights View
 
 @MainActor
-struct ProfileStatBox: View {
-    let value: Int
-    let label: String
+struct AllNightsView: View {
+    @Environment(\.dismiss) private var dismiss
+    let nights: [SupabaseNight]
+
+    private let gridColumns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
 
     var body: some View {
-        VStack(spacing: NightOutSpacing.xs) {
-            Text("\(value)")
-                .font(NightOutTypography.title2)
-                .foregroundStyle(NightOutColors.chrome)
-
-            Text(label)
-                .font(NightOutTypography.caption)
-                .foregroundStyle(NightOutColors.silver)
+        NavigationStack {
+            ScrollView {
+                LazyVGrid(columns: gridColumns, spacing: 12) {
+                    ForEach(nights) { night in
+                        NavigationLink {
+                            NightDetailView(nightId: night.id)
+                        } label: {
+                            NightGridCard(
+                                duration: formatDuration(night.duration),
+                                title: night.title ?? "Untitled",
+                                date: formatDate(night.startTime)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .contentShape(Rectangle())
+                    }
+                }
+                .padding(NightOutSpacing.screenHorizontal)
+            }
+            .nightOutBackground()
+            .navigationTitle("All Nights")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .foregroundStyle(NightOutColors.partyPurple)
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let hours = seconds / 3600
+        let minutes = (seconds % 3600) / 60
+        let secs = seconds % 60
+
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, secs)
+        }
+        return String(format: "%02d:%02d", minutes, secs)
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, MMMM d"
+        return formatter.string(from: date)
     }
 }
 
-// MARK: - Profile Friend Avatar
+// MARK: - Profile Skeleton View
 
 @MainActor
-struct ProfileFriendAvatar: View {
-    let friendUserId: UUID
-    @State private var profile: SupabaseProfile?
-
+struct ProfileSkeletonView: View {
     var body: some View {
-        VStack(spacing: NightOutSpacing.xs) {
-            AvatarView(
-                url: profile?.avatarUrl.flatMap { URL(string: $0) },
-                name: profile?.displayName ?? "Friend",
-                size: 60
-            )
+        VStack(spacing: NightOutSpacing.xl) {
+            // Avatar placeholder
+            Circle()
+                .fill(NightOutColors.surface)
+                .frame(width: 100, height: 100)
 
-            Text(profile?.displayName.prefix(8).description ?? "...")
-                .font(NightOutTypography.caption)
-                .foregroundStyle(NightOutColors.silver)
-                .lineLimit(1)
+            // Username placeholder
+            RoundedRectangle(cornerRadius: 8)
+                .fill(NightOutColors.surface)
+                .frame(width: 120, height: 24)
+
+            // Bio placeholder
+            RoundedRectangle(cornerRadius: 8)
+                .fill(NightOutColors.surface)
+                .frame(width: 200, height: 16)
+
+            // Stats row placeholder
+            HStack(spacing: NightOutSpacing.xxl) {
+                ForEach(0..<3, id: \.self) { _ in
+                    VStack(spacing: NightOutSpacing.xs) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(NightOutColors.surface)
+                            .frame(width: 40, height: 28)
+
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(NightOutColors.surface)
+                            .frame(width: 50, height: 12)
+                    }
+                }
+            }
+
+            Spacer()
         }
-        .task {
-            profile = try? await UserService.shared.getProfile(userId: friendUserId)
-        }
+        .padding(.top, NightOutSpacing.xxxl)
     }
 }
 
@@ -397,7 +403,7 @@ struct ProfileFriendsListView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundStyle(NightOutColors.neonPink)
+                    .foregroundStyle(NightOutColors.partyPurple)
                 }
             }
         }
@@ -525,40 +531,41 @@ struct ProfileFriendListRow: View {
     let onRemove: () -> Void
 
     var body: some View {
-        GlassCard {
-            HStack(spacing: NightOutSpacing.md) {
-                AvatarView(
-                    url: profile?.avatarUrl.flatMap { URL(string: $0) },
-                    name: profile?.displayName ?? "Friend",
-                    size: 50
-                )
+        HStack(spacing: NightOutSpacing.md) {
+            AvatarView(
+                url: profile?.avatarUrl.flatMap { URL(string: $0) },
+                name: profile?.displayName ?? "Friend",
+                size: 50
+            )
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(profile?.displayName ?? "Loading...")
-                        .font(NightOutTypography.headline)
-                        .foregroundStyle(NightOutColors.chrome)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(profile?.displayName ?? "Loading...")
+                    .font(NightOutTypography.headline)
+                    .foregroundStyle(NightOutColors.chrome)
 
-                    Text("@\(profile?.username ?? "...")")
-                        .font(NightOutTypography.caption)
-                        .foregroundStyle(NightOutColors.silver)
-                }
+                Text("@\(profile?.username ?? "...")")
+                    .font(NightOutTypography.caption)
+                    .foregroundStyle(NightOutColors.silver)
+            }
 
-                Spacer()
+            Spacer()
 
-                Menu {
-                    Button(role: .destructive) {
-                        onRemove()
-                    } label: {
-                        Label("Remove Friend", systemImage: "person.badge.minus")
-                    }
+            Menu {
+                Button(role: .destructive) {
+                    onRemove()
                 } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 16))
-                        .foregroundStyle(NightOutColors.silver)
-                        .frame(width: 44, height: 44)
+                    Label("Remove Friend", systemImage: "person.badge.minus")
                 }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 16))
+                    .foregroundStyle(NightOutColors.silver)
+                    .frame(width: 44, height: 44)
             }
         }
+        .padding(NightOutSpacing.md)
+        .background(NightOutColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.card))
     }
 }
 
@@ -572,55 +579,56 @@ struct ProfileFriendRequestListRow: View {
     let onReject: () -> Void
 
     var body: some View {
-        GlassCard {
-            HStack(spacing: NightOutSpacing.md) {
-                AvatarView(
-                    url: profile?.avatarUrl.flatMap { URL(string: $0) },
-                    name: profile?.displayName ?? "User",
-                    size: 50
-                )
+        HStack(spacing: NightOutSpacing.md) {
+            AvatarView(
+                url: profile?.avatarUrl.flatMap { URL(string: $0) },
+                name: profile?.displayName ?? "User",
+                size: 50
+            )
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(profile?.displayName ?? "Loading...")
-                        .font(NightOutTypography.headline)
-                        .foregroundStyle(NightOutColors.chrome)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(profile?.displayName ?? "Loading...")
+                    .font(NightOutTypography.headline)
+                    .foregroundStyle(NightOutColors.chrome)
 
-                    Text("@\(profile?.username ?? "...")")
-                        .font(NightOutTypography.caption)
+                Text("@\(profile?.username ?? "...")")
+                    .font(NightOutTypography.caption)
+                    .foregroundStyle(NightOutColors.silver)
+            }
+
+            Spacer()
+
+            HStack(spacing: NightOutSpacing.sm) {
+                Button {
+                    onReject()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(NightOutColors.silver)
+                        .frame(width: 36, height: 36)
+                        .background(NightOutColors.surfaceMedium)
+                        .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
+                .contentShape(Circle())
 
-                Spacer()
-
-                HStack(spacing: NightOutSpacing.sm) {
-                    Button {
-                        onReject()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(NightOutColors.silver)
-                            .frame(width: 36, height: 36)
-                            .background(NightOutColors.surface)
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-
-                    Button {
-                        onAccept()
-                    } label: {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 36, height: 36)
-                            .background(NightOutColors.neonPink)
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
+                Button {
+                    onAccept()
+                } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(NightOutColors.neonPink)
+                        .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
+                .contentShape(Circle())
             }
         }
+        .padding(NightOutSpacing.md)
+        .background(NightOutColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.card))
     }
 }
 

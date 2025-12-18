@@ -1,9 +1,10 @@
 import SwiftUI
 import PhotosUI
+import MapKit
 import UIKit
 import Auth
 
-/// Active night tracking dashboard - Strava-style with real-time stats
+/// Active night tracking dashboard - Pixel-perfect Strava-style redesign
 @MainActor
 struct ActiveTrackingView: View {
     @State private var night: SupabaseNight?
@@ -18,6 +19,7 @@ struct ActiveTrackingView: View {
     @State private var showEndNight = false
     @State private var showMoodPicker = false
     @State private var showCamera = false
+    @State private var showSongPicker = false
 
     // Photo picker
     @State private var selectedPhoto: PhotosPickerItem?
@@ -26,63 +28,48 @@ struct ActiveTrackingView: View {
     @State private var isLoading = true
     @State private var isPulsing = false
 
+    // Map region
+    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+
     var body: some View {
         Group {
             if isLoading {
                 LoadingView()
             } else if let night {
-                ScrollView {
-                    VStack(spacing: NightOutSpacing.xl) {
-                        // Timer header with pulsing indicator
-                        TimerHeader(
-                            elapsedTime: elapsedTime,
-                            venueName: night.currentVenueName,
+                ZStack {
+                    // Map background
+                    mapBackground
+
+                    // Content overlay
+                    VStack(spacing: 0) {
+                        // Header with recording indicator
+                        headerBar
+
+                        // Timer card
+                        TimerCard(
+                            time: formattedTime,
+                            vibeName: night.title,
+                            friendCount: 0,
                             isPulsing: $isPulsing
                         )
-                        .padding(.top, NightOutSpacing.lg)
-
-                        // Quick stats row
-                        QuickStatsRow(
-                            distance: night.distance,
-                            drinkCount: drinks.count,
-                            venueCount: 0 // TODO: Track venues
-                        )
                         .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                        .padding(.top, NightOutSpacing.md)
 
-                        // Drinks section
-                        if !drinks.isEmpty {
-                            DrinksDisplaySection(drinks: drinks)
-                        }
+                        // Stats pills row
+                        statsPillsRow
+                            .padding(.top, NightOutSpacing.md)
+
+                        Spacer()
 
                         // Quick action buttons
-                        QuickActionsGrid(
-                            onAddDrink: { showAddDrink = true },
-                            onCheckIn: { showAddVenue = true },
-                            onTakePhoto: { showCamera = true },
-                            onMood: { showMoodPicker = true }
-                        )
-                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                        quickActionsCard
+                            .padding(.horizontal, NightOutSpacing.screenHorizontal)
 
-                        // Current mood indicator
-                        MoodIndicator(mood: currentMood) {
-                            showMoodPicker = true
-                        }
-                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
-
-                        Spacer(minLength: NightOutSpacing.xxxl)
-
-                        // End night button
-                        GlassButton(
-                            "End Night",
-                            icon: "moon.zzz.fill",
-                            style: .destructive,
-                            size: .large
-                        ) {
-                            NightOutHaptics.medium()
-                            showEndNight = true
-                        }
-                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
-                        .padding(.bottom, NightOutSpacing.xxl)
+                        // Bottom buttons (Add Drink + End)
+                        bottomButtons
+                            .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                            .padding(.top, NightOutSpacing.md)
+                            .padding(.bottom, NightOutSpacing.lg)
                     }
                 }
             } else {
@@ -93,9 +80,24 @@ struct ActiveTrackingView: View {
                 )
             }
         }
-        .nightOutBackground()
-        .navigationTitle("Tracking")
+        .navigationTitle("Your Night")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                RecordingIndicator()
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    // Show friends on map
+                } label: {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(NightOutColors.electricBlue)
+                }
+                .buttonStyle(.plain)
+                .contentShape(Rectangle())
+            }
+        }
         .sheet(isPresented: $showAddDrink) {
             if let night {
                 AddDrinkView(nightId: night.id) {
@@ -135,6 +137,101 @@ struct ActiveTrackingView: View {
         .onDisappear {
             stopTimer()
         }
+    }
+
+    // MARK: - Map Background
+
+    private var mapBackground: some View {
+        Map(position: $cameraPosition) {
+            UserAnnotation()
+        }
+        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+        .mapControls {}
+        .overlay(
+            LinearGradient(
+                colors: [
+                    NightOutColors.background.opacity(0.9),
+                    NightOutColors.background.opacity(0.3),
+                    Color.clear,
+                    NightOutColors.background.opacity(0.5),
+                    NightOutColors.background.opacity(0.95)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .ignoresSafeArea()
+    }
+
+    // MARK: - Header Bar
+
+    private var headerBar: some View {
+        EmptyView()
+    }
+
+    // MARK: - Stats Pills Row
+
+    private var statsPillsRow: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: NightOutSpacing.sm) {
+                StatPill(emoji: Emoji.distance, value: formattedDistance, label: "mi")
+                StatPill(emoji: Emoji.drinks, value: "\(drinks.count)", label: "drinks")
+                StatPill(emoji: Emoji.photos, value: "0", label: "pics")
+                StatPill(emoji: Emoji.spots, value: "0", label: "spots")
+            }
+            .padding(.horizontal, NightOutSpacing.screenHorizontal)
+        }
+    }
+
+    // MARK: - Quick Actions Card
+
+    private var quickActionsCard: some View {
+        HStack(spacing: 0) {
+            QuickActionItem(emoji: "📸🔥", label: "Photo") {
+                showCamera = true
+            }
+            QuickActionItem(emoji: Emoji.songs, label: "Song") {
+                showSongPicker = true
+            }
+            QuickActionItem(emoji: Emoji.sparkles, label: "Vibe") {
+                showMoodPicker = true
+            }
+            QuickActionItem(emoji: Emoji.spots, label: "Spot") {
+                showAddVenue = true
+            }
+        }
+        .padding(.vertical, NightOutSpacing.sm)
+        .background(NightOutColors.surface.opacity(0.9))
+        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.card))
+    }
+
+    // MARK: - Bottom Buttons
+
+    private var bottomButtons: some View {
+        HStack(spacing: NightOutSpacing.md) {
+            AddDrinkFAB {
+                showAddDrink = true
+            }
+
+            MoonEndButton {
+                showEndNight = true
+            }
+        }
+    }
+
+    // MARK: - Computed Properties
+
+    private var formattedTime: String {
+        let hours = Int(elapsedTime) / 3600
+        let minutes = (Int(elapsedTime) % 3600) / 60
+        let seconds = Int(elapsedTime) % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
+
+    private var formattedDistance: String {
+        guard let night else { return "0.0" }
+        let miles = night.distance / 1609.34
+        return String(format: "%.1f", miles)
     }
 
     // MARK: - Actions
@@ -181,7 +278,7 @@ struct ActiveTrackingView: View {
     }
 
     private func startPulseAnimation() {
-        withAnimation(Animation.easeInOut(duration: 1.0).repeatForever(autoreverses: true)) {
+        withAnimation(NightOutAnimation.pulse) {
             isPulsing = true
         }
     }
@@ -192,7 +289,6 @@ struct ActiveTrackingView: View {
         do {
             if let data = try await item.loadTransferable(type: Data.self),
                let uiImage = UIImage(data: data) {
-                // Upload photo
                 _ = try await MediaService.shared.uploadPhoto(
                     nightId: night.id,
                     image: uiImage
@@ -206,315 +302,8 @@ struct ActiveTrackingView: View {
     }
 }
 
-// MARK: - Timer Header
-@MainActor
-struct TimerHeader: View {
-    let elapsedTime: TimeInterval
-    let venueName: String?
-    @Binding var isPulsing: Bool
-
-    var body: some View {
-        VStack(spacing: NightOutSpacing.md) {
-            // Live indicator with pulse
-            HStack(spacing: NightOutSpacing.sm) {
-                Circle()
-                    .fill(NightOutColors.liveRed)
-                    .frame(width: 10, height: 10)
-                    .scaleEffect(isPulsing ? 1.2 : 1.0)
-                    .shadow(color: NightOutColors.liveRed.opacity(0.5), radius: isPulsing ? 8 : 4)
-
-                Text("LIVE")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(NightOutColors.liveRed)
-                    .tracking(2)
-            }
-            .padding(.horizontal, NightOutSpacing.md)
-            .padding(.vertical, NightOutSpacing.xs)
-            .background(NightOutColors.liveRed.opacity(0.1))
-            .clipShape(Capsule())
-
-            // Timer
-            Text(formattedTime)
-                .font(.system(size: 56, weight: .bold, design: .rounded))
-                .foregroundStyle(NightOutColors.chrome)
-                .monospacedDigit()
-                .contentTransition(.numericText())
-
-            // Venue name
-            if let venueName {
-                HStack(spacing: NightOutSpacing.xs) {
-                    Image(systemName: "mappin.circle.fill")
-                        .foregroundStyle(NightOutColors.neonPink)
-                    Text(venueName)
-                        .font(NightOutTypography.subheadline)
-                        .foregroundStyle(NightOutColors.silver)
-                }
-            }
-        }
-    }
-
-    private var formattedTime: String {
-        let hours = Int(elapsedTime) / 3600
-        let minutes = (Int(elapsedTime) % 3600) / 60
-        let seconds = Int(elapsedTime) % 60
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-}
-
-// MARK: - Quick Stats Row
-@MainActor
-struct QuickStatsRow: View {
-    let distance: Double
-    let drinkCount: Int
-    let venueCount: Int
-
-    var body: some View {
-        GlassCard {
-            HStack(spacing: 0) {
-                StatItem(
-                    value: formattedDistance,
-                    label: "Distance",
-                    icon: "figure.walk",
-                    color: NightOutColors.electricBlue
-                )
-
-                Divider()
-                    .frame(height: 40)
-                    .background(NightOutColors.glassBorder)
-
-                StatItem(
-                    value: "\(drinkCount)",
-                    label: "Drinks",
-                    icon: "wineglass.fill",
-                    color: NightOutColors.neonPink
-                )
-
-                Divider()
-                    .frame(height: 40)
-                    .background(NightOutColors.glassBorder)
-
-                StatItem(
-                    value: "\(venueCount)",
-                    label: "Venues",
-                    icon: "mappin.circle.fill",
-                    color: NightOutColors.goldenHour
-                )
-            }
-        }
-    }
-
-    private var formattedDistance: String {
-        if distance >= 1000 {
-            return String(format: "%.1fkm", distance / 1000)
-        }
-        return String(format: "%.0fm", distance)
-    }
-}
-
-@MainActor
-struct StatItem: View {
-    let value: String
-    let label: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(spacing: NightOutSpacing.xs) {
-            Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundStyle(color)
-
-            Text(value)
-                .font(NightOutTypography.statNumber)
-                .foregroundStyle(NightOutColors.chrome)
-
-            Text(label)
-                .font(NightOutTypography.caption)
-                .foregroundStyle(NightOutColors.dimmed)
-        }
-        .frame(maxWidth: .infinity)
-    }
-}
-
-// MARK: - Drinks Display Section
-@MainActor
-struct DrinksDisplaySection: View {
-    let drinks: [SupabaseDrink]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: NightOutSpacing.md) {
-            HStack {
-                Text("Tonight's Drinks")
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                Spacer()
-
-                Text("\(drinks.count) total")
-                    .font(NightOutTypography.caption)
-                    .foregroundStyle(NightOutColors.dimmed)
-            }
-            .padding(.horizontal, NightOutSpacing.screenHorizontal)
-
-            // Emoji display
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: NightOutSpacing.sm) {
-                    ForEach(drinks, id: \.id) { drink in
-                        DrinkBubble(drink: drink)
-                    }
-                }
-                .padding(.horizontal, NightOutSpacing.screenHorizontal)
-            }
-        }
-    }
-}
-
-@MainActor
-struct DrinkBubble: View {
-    let drink: SupabaseDrink
-
-    var body: some View {
-        let drinkType = DrinkType(rawValue: drink.type) ?? .custom
-
-        VStack(spacing: 4) {
-            Text(drink.customEmoji ?? drinkType.emoji)
-                .font(.system(size: 32))
-
-            Text(timeAgo)
-                .font(.system(size: 10))
-                .foregroundStyle(NightOutColors.dimmed)
-        }
-        .padding(NightOutSpacing.sm)
-        .background(drinkType.color.opacity(0.2))
-        .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.md))
-    }
-
-    private var timeAgo: String {
-        let interval = Date().timeIntervalSince(drink.timestamp)
-        let minutes = Int(interval / 60)
-        if minutes < 60 {
-            return "\(minutes)m ago"
-        }
-        return "\(minutes / 60)h ago"
-    }
-}
-
-// MARK: - Quick Actions Grid
-@MainActor
-struct QuickActionsGrid: View {
-    let onAddDrink: () -> Void
-    let onCheckIn: () -> Void
-    let onTakePhoto: () -> Void
-    let onMood: () -> Void
-
-    var body: some View {
-        VStack(spacing: NightOutSpacing.md) {
-            HStack(spacing: NightOutSpacing.md) {
-                QuickActionButton(
-                    icon: "plus.circle.fill",
-                    label: "Add Drink",
-                    color: NightOutColors.neonPink,
-                    action: onAddDrink
-                )
-
-                QuickActionButton(
-                    icon: "mappin.circle.fill",
-                    label: "Check In",
-                    color: NightOutColors.goldenHour,
-                    action: onCheckIn
-                )
-            }
-
-            HStack(spacing: NightOutSpacing.md) {
-                QuickActionButton(
-                    icon: "camera.fill",
-                    label: "Photo",
-                    color: NightOutColors.electricBlue,
-                    action: onTakePhoto
-                )
-
-                QuickActionButton(
-                    icon: "face.smiling.fill",
-                    label: "Mood",
-                    color: NightOutColors.partyPurple,
-                    action: onMood
-                )
-            }
-        }
-    }
-}
-
-@MainActor
-struct QuickActionButton: View {
-    let icon: String
-    let label: String
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button {
-            NightOutHaptics.light()
-            action()
-        } label: {
-            HStack(spacing: NightOutSpacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(color)
-
-                Text(label)
-                    .font(NightOutTypography.headline)
-                    .foregroundStyle(NightOutColors.chrome)
-
-                Spacer()
-            }
-            .padding(NightOutSpacing.md)
-            .frame(maxWidth: .infinity)
-            .background(NightOutColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.md))
-        }
-        .buttonStyle(.plain)
-        .contentShape(Rectangle())
-    }
-}
-
-// MARK: - Mood Indicator
-@MainActor
-struct MoodIndicator: View {
-    let mood: MoodLevel
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                Text("Current Mood")
-                    .font(NightOutTypography.subheadline)
-                    .foregroundStyle(NightOutColors.silver)
-
-                Spacer()
-
-                HStack(spacing: NightOutSpacing.sm) {
-                    Text(mood.emoji)
-                        .font(.system(size: 24))
-
-                    Text(mood.displayName)
-                        .font(NightOutTypography.headline)
-                        .foregroundStyle(NightOutColors.chrome)
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(NightOutColors.dimmed)
-                }
-            }
-            .padding(NightOutSpacing.md)
-            .background(NightOutColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: NightOutRadius.md))
-        }
-        .buttonStyle(.plain)
-        .contentShape(Rectangle())
-    }
-}
-
 // MARK: - Mood Picker Sheet
+
 @MainActor
 struct MoodPickerSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -537,7 +326,6 @@ struct MoodPickerSheet: View {
                         ) {
                             currentMood = mood
                             NightOutHaptics.medium()
-                            // TODO: Save mood to Supabase
                             dismiss()
                         }
                     }
@@ -590,12 +378,12 @@ struct MoodButton: View {
 }
 
 // MARK: - Camera Sheet
+
 @MainActor
 struct CameraSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedPhoto: PhotosPickerItem?
 
-    // Capture static values for Sendable closure
     private let captionFont = NightOutTypography.caption
     private let silverColor = NightOutColors.silver
     private let smallSpacing = NightOutSpacing.sm
@@ -618,13 +406,10 @@ struct CameraSheet: View {
                 Spacer()
 
                 VStack(spacing: NightOutSpacing.md) {
-                    // Camera button would launch actual camera
-                    GlassButton("Take Photo", icon: "camera.fill", style: .primary, size: .large) {
-                        // TODO: Launch actual camera
+                    PrimaryGradientButton(title: "Take Photo", emoji: "📸") {
                         NightOutHaptics.medium()
                     }
 
-                    // Photo picker
                     PhotosPicker(
                         selection: $selectedPhoto,
                         matching: .images,
@@ -655,6 +440,38 @@ struct CameraSheet: View {
         }
         .onChange(of: selectedPhoto) { _, _ in
             dismiss()
+        }
+    }
+}
+
+// MARK: - Mood Level
+
+enum MoodLevel: String, CaseIterable, Identifiable {
+    case tired
+    case okay
+    case good
+    case great
+    case amazing
+
+    var id: String { rawValue }
+
+    var emoji: String {
+        switch self {
+        case .tired: return "😴"
+        case .okay: return "😐"
+        case .good: return "😊"
+        case .great: return "😄"
+        case .amazing: return "🤩"
+        }
+    }
+
+    var displayName: String {
+        switch self {
+        case .tired: return "Tired"
+        case .okay: return "Okay"
+        case .good: return "Good"
+        case .great: return "Great"
+        case .amazing: return "Amazing"
         }
     }
 }

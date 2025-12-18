@@ -1,158 +1,201 @@
 import SwiftUI
 
-/// Sign up view for account creation
+/// Combined authentication view with sign in / sign up toggle
+/// Pixel-perfect redesign matching reference screenshots
 @MainActor
 struct SignUpView: View {
     @Environment(\.dismiss) private var dismiss
 
+    // Auth mode toggle
+    @State private var isSignUp = true
+
+    // Sign Up fields
     @State private var email = ""
+    @State private var username = ""
     @State private var password = ""
     @State private var confirmPassword = ""
-    @State private var username = ""
-    @State private var displayName = ""
+
+    // UI state
     @State private var isLoading = false
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var showSuccess = false
 
     var body: some View {
-        NavigationStack {
+        ZStack {
+            // Vignette background
+            NightOutColors.backgroundVignette
+                .ignoresSafeArea()
+
             ScrollView {
                 VStack(spacing: NightOutSpacing.xxl) {
-                    // Header
-                    VStack(spacing: NightOutSpacing.md) {
-                        Text("Create Account")
-                            .font(NightOutTypography.largeTitle)
-                            .foregroundStyle(NightOutColors.chrome)
+                    // Logo section
+                    logoSection
+                        .padding(.top, NightOutSpacing.huge)
 
-                        Text("Join the party")
-                            .font(NightOutTypography.body)
+                    // Auth toggle
+                    AuthToggle(isSignUp: $isSignUp)
+                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+
+                    // Form fields
+                    formSection
+                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+
+                    // Primary button
+                    primaryButton
+                        .padding(.horizontal, NightOutSpacing.screenHorizontal)
+
+                    // Terms text
+                    if isSignUp {
+                        Text("By signing up, you agree to our terms and conditions")
+                            .font(NightOutTypography.caption)
                             .foregroundStyle(NightOutColors.silver)
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(.top, NightOutSpacing.xl)
 
-                    // Form
-                    VStack(spacing: NightOutSpacing.lg) {
-                        // Display Name
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            Text("Display Name")
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
+                    // Guest option
+                    guestSection
+                        .padding(.top, NightOutSpacing.md)
 
-                            TextField("", text: $displayName)
-                                .textFieldStyle(GlassTextFieldStyle())
-                                .textContentType(.name)
-                        }
-
-                        // Username
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            Text("Username")
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-
-                            TextField("", text: $username)
-                                .textFieldStyle(GlassTextFieldStyle())
-                                .textContentType(.username)
-                                .autocapitalization(.none)
-                                .autocorrectionDisabled()
-                        }
-
-                        // Email
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            Text("Email")
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-
-                            TextField("", text: $email)
-                                .textFieldStyle(GlassTextFieldStyle())
-                                .textContentType(.emailAddress)
-                                .keyboardType(.emailAddress)
-                                .autocapitalization(.none)
-                                .autocorrectionDisabled()
-                        }
-
-                        // Password
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            Text("Password")
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-
-                            SecureField("", text: $password)
-                                .textFieldStyle(GlassTextFieldStyle())
-                                .textContentType(.newPassword)
-                        }
-
-                        // Confirm Password
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            Text("Confirm Password")
-                                .font(NightOutTypography.caption)
-                                .foregroundStyle(NightOutColors.silver)
-
-                            SecureField("", text: $confirmPassword)
-                                .textFieldStyle(GlassTextFieldStyle())
-                                .textContentType(.newPassword)
-                        }
-
-                        // Password requirements
-                        VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
-                            PasswordRequirement("At least 8 characters", met: password.count >= 8)
-                            PasswordRequirement("Contains a number", met: password.contains(where: \.isNumber))
-                        }
-                        .padding(.vertical, NightOutSpacing.xs)
-
-                        // Sign up button
-                        GlassButton("Create Account", icon: "person.badge.plus", style: .primary, size: .large, isLoading: isLoading) {
-                            Task { await signUp() }
-                        }
-                        .padding(.top, NightOutSpacing.sm)
-                    }
-                    .padding(.horizontal, NightOutSpacing.screenHorizontal)
+                    Spacer(minLength: NightOutSpacing.huge)
                 }
             }
             .scrollDismissesKeyboard(.interactively)
-            .nightOutBackground()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundStyle(NightOutColors.silver)
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-                }
+        }
+        .alert("Error", isPresented: $showError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage)
+        }
+        .alert("Account Created", isPresented: $showSuccess) {
+            Button("OK") {
+                dismiss()
             }
-            .alert("Error", isPresented: $showError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(errorMessage)
+        } message: {
+            Text("Check your email to verify your account, then sign in.")
+        }
+    }
+
+    // MARK: - Logo Section
+
+    private var logoSection: some View {
+        VStack(spacing: NightOutSpacing.lg) {
+            DiscoBallLogo(size: 80)
+
+            Text("NIGHTOUT")
+                .font(NightOutTypography.largeTitle)
+                .foregroundStyle(NightOutColors.chrome)
+                .tracking(2)
+        }
+    }
+
+    // MARK: - Form Section
+
+    private var formSection: some View {
+        VStack(spacing: NightOutSpacing.lg) {
+            UltraInputField(
+                icon: Emoji.email,
+                placeholder: "Email",
+                text: $email,
+                keyboardType: .emailAddress,
+                textContentType: .emailAddress
+            )
+
+            if isSignUp {
+                UltraInputField(
+                    icon: "@",
+                    placeholder: "Username",
+                    text: $username,
+                    textContentType: .username
+                )
             }
-            .alert("Account Created", isPresented: $showSuccess) {
-                Button("OK") {
-                    dismiss()
+
+            UltraInputField(
+                icon: Emoji.password,
+                placeholder: "Password",
+                text: $password,
+                isSecure: true,
+                textContentType: isSignUp ? .newPassword : .password
+            )
+
+            if isSignUp {
+                UltraInputField(
+                    icon: Emoji.password,
+                    placeholder: "Confirm Password",
+                    text: $confirmPassword,
+                    isSecure: true,
+                    textContentType: .newPassword
+                )
+            }
+
+            // Password requirements (sign up only)
+            if isSignUp {
+                VStack(alignment: .leading, spacing: NightOutSpacing.xs) {
+                    PasswordRequirementRow("At least 8 characters", met: password.count >= 8)
+                    PasswordRequirementRow("Contains a number", met: password.contains(where: \.isNumber))
                 }
-            } message: {
-                Text("Check your email to verify your account, then sign in.")
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .animation(NightOutAnimation.smooth, value: isSignUp)
+    }
+
+    // MARK: - Primary Button
+
+    private var primaryButton: some View {
+        PrimaryGradientButton(
+            title: isSignUp ? "Create Account" : "Sign In",
+            emoji: isSignUp ? Emoji.party : nil,
+            isLoading: isLoading
+        ) {
+            Task {
+                if isSignUp {
+                    await signUp()
+                } else {
+                    await signIn()
+                }
             }
         }
     }
 
+    // MARK: - Guest Section
+
+    private var guestSection: some View {
+        Button {
+            NightOutHaptics.light()
+            continueAsGuest()
+        } label: {
+            VStack(spacing: NightOutSpacing.xs) {
+                HStack(spacing: NightOutSpacing.xs) {
+                    Text("Continue as Guest")
+                        .font(NightOutTypography.subheadline)
+                        .foregroundStyle(NightOutColors.silver)
+
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12))
+                        .foregroundStyle(NightOutColors.silver)
+                }
+
+                Text("Some features require sign in")
+                    .font(NightOutTypography.caption2)
+                    .foregroundStyle(NightOutColors.dimmed)
+            }
+        }
+        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+    }
+
+    // MARK: - Actions
+
     private func signUp() async {
         // Validate
-        guard !displayName.isEmpty else {
-            errorMessage = "Please enter your name"
+        guard !email.isEmpty else {
+            errorMessage = "Please enter your email"
             showError = true
             return
         }
         guard !username.isEmpty else {
             errorMessage = "Please choose a username"
-            showError = true
-            return
-        }
-        guard !email.isEmpty else {
-            errorMessage = "Please enter your email"
             showError = true
             return
         }
@@ -184,7 +227,7 @@ struct SignUpView: View {
                 email: email,
                 password: password,
                 username: username,
-                displayName: displayName
+                displayName: username
             )
 
             NightOutHaptics.success()
@@ -195,11 +238,42 @@ struct SignUpView: View {
             NightOutHaptics.error()
         }
     }
+
+    private func signIn() async {
+        guard !email.isEmpty else {
+            errorMessage = "Please enter your email"
+            showError = true
+            return
+        }
+        guard !password.isEmpty else {
+            errorMessage = "Please enter your password"
+            showError = true
+            return
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            try await AuthService.shared.signIn(email: email, password: password)
+            NightOutHaptics.success()
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+            NightOutHaptics.error()
+        }
+    }
+
+    private func continueAsGuest() {
+        SessionManager.shared.enableGuestMode()
+        dismiss()
+    }
 }
 
 // MARK: - Password Requirement Row
 @MainActor
-struct PasswordRequirement: View {
+struct PasswordRequirementRow: View {
     let text: String
     let met: Bool
 
