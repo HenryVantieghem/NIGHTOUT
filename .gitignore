@@ -71,6 +71,7 @@ fastlane/test_output
 *.p12
 *.key
 secrets/
+Secrets.plist
 
 # Supabase local
 supabase/.branches/
